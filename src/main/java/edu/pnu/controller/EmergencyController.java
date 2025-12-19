@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
 import edu.pnu.service.EmergencyService;
 import lombok.RequiredArgsConstructor;
 
@@ -12,6 +13,12 @@ import lombok.RequiredArgsConstructor;
 public class EmergencyController {
 	
 	private final EmergencyService emergencyService;
+	
+	// index
+	@GetMapping("/")
+	public String index() {
+		return "index";
+	}
 	
 	// 전체 검색 혹은 지역구로 검색
 	@GetMapping("/ERInfo")
