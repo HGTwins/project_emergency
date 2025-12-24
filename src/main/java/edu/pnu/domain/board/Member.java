@@ -1,4 +1,4 @@
-package edu.pnu.domain;
+package edu.pnu.domain.board;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,20 +17,19 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@Getter
 @Setter
-@ToString
+@Getter
+@ToString(exclude = "boardList")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "Member")
 public class Member {
 	@Id
-	@Column(name="MEMBER_ID")
 	private String username;
 	@Column(nullable = false)
 	private String password;
+	@Column(nullable = false)
 	private String alias;
 	@Enumerated(EnumType.STRING)
 	private Role role;
