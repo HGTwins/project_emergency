@@ -2,6 +2,8 @@ package edu.pnu.persistence.hospital;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,7 +17,7 @@ public interface BasicInfoRepository extends JpaRepository<BasicInfo, String> {
 	@Query("SELECT b FROM BasicInfo b " +
 		   "JOIN SigunguCode s ON b.sidoCode = s.sidoCode " +
 		   "WHERE s.sigunguName = :sigunguName")
-	List<BasicInfo> findBySigunguName(@Param("sigunguName") String sigunguName);
+	Page<BasicInfo> findBySigunguName(@Param("sigunguName") String sigunguName, Pageable pageable);
 	
 	// 전체 병원 수
 	@Query("SELECT COUNT(b) FROM BasicInfo b")

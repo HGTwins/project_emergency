@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import edu.pnu.domain.hospital.BasicInfo;
+import edu.pnu.dto.BasicInfoDTO;
 import edu.pnu.persistence.hospital.BasicInfoRepository;
 import edu.pnu.persistence.hospital.OffsetRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,14 +20,17 @@ public class HospitalService {
 	private final OffsetRepository offsetRepo;
 	
 	// 시군구로 조회
-	public List<BasicInfo> findBySigunguName(String sigunguName){
-		return basicInfoRepo.findBySigunguName(sigunguName);
+	public Page<BasicInfoDTO> findBySigunguName(String sigunguName, int page, int size){
+		Pageable pageable = PageRequest.of(page, size);
+		return basicInfoRepo.findBySigunguName(sigunguName, pageable)
+				.map(BasicInfoDTO::from);
 	}
 	
 	// 전부 조회
-	public Page<BasicInfo> findAll(int page, int size){
+	public Page<BasicInfoDTO> findAll(int page, int size){
 		Pageable pageable = PageRequest.of(page, size);
-		return basicInfoRepo.findAll(pageable);
+		return basicInfoRepo.findAll(pageable)
+				.map(BasicInfoDTO::from);
 	}
 	
 	// 전체 병원 수

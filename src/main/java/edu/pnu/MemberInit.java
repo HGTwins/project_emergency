@@ -4,6 +4,7 @@ import java.util.Date;
 
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +21,7 @@ public class MemberInit implements ApplicationRunner {
 
 	private final MemberRepository memberRepo;
 	private final BoardRepository boardRepo;
-	private final PasswordEncoder encoder;
+	private final PasswordEncoder encoder  = new BCryptPasswordEncoder();
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
