@@ -16,6 +16,6 @@ public class CustomConfig implements WebMvcConfigurer {
 			.exposedHeaders(HttpHeaders.AUTHORIZATION)
 			.allowedMethods(HttpMethod.GET.name(),
 							HttpMethod.POST.name())
-			.allowedOriginPatterns("http://*:*");
+			.allowedOriginPatterns("http://localhost:3000", "http://127.0.0.1:3000");
 	}
 }

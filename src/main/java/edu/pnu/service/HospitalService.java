@@ -7,22 +7,19 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import edu.pnu.domain.hospital.BasicInfo;
 import edu.pnu.dto.BasicInfoDTO;
-import edu.pnu.persistence.hospital.BasicInfoRepository;
-import edu.pnu.persistence.hospital.OffsetRepository;
+import edu.pnu.persistence.HospitalRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class HospitalService {
-	private final BasicInfoRepository basicInfoRepo;
-	private final OffsetRepository offsetRepo;
+	private final HospitalRepository basicInfoRepo;
 	
-	// 시군구로 조회
-	public Page<BasicInfoDTO> findBySigunguName(String sigunguName, int page, int size){
+	// 시도 및 시군구로 조회
+	public Page<BasicInfoDTO> findBySidoNameAndSigunguName(String sidoName, String sigunguName, int page, int size){
 		Pageable pageable = PageRequest.of(page, size);
-		return basicInfoRepo.findBySigunguName(sigunguName, pageable)
+		return basicInfoRepo.findBySidoNameAndSigunguName(sidoName, sigunguName, pageable)
 				.map(BasicInfoDTO::from);
 	}
 	
@@ -33,37 +30,50 @@ public class HospitalService {
 				.map(BasicInfoDTO::from);
 	}
 	
+	// 하나만 조회
+	public BasicInfoDTO findById(String careEncCode) {
+		return basicInfoRepo.findById(careEncCode)
+				.map(BasicInfoDTO::from)
+				.orElseThrow(() -> new IllegalArgumentException("해당 병원 없음"));
+	}
+
+	// 위치로 조회
+	public List<BasicInfoDTO> findByLocation(double swLat, double neLat, double swLng, double neLng, int level){
+	
+		int limit = switch(level) {
+			case 1, 2 -> 1000;
+			case 3, 4 -> 500;
+			default -> 200;
+		};
+		
+		Pageable pageable = PageRequest.of(0, limit);
+
+		return basicInfoRepo.findByLocation(swLat, neLat, swLng, neLng, pageable)
+				.stream()
+				.map(BasicInfoDTO::from)
+				.toList();
+	}
+	
 	// 전체 병원 수
 	public long countAllHospitals() {
 		return basicInfoRepo.countAllHospitals();
 	}
 	
-	// 시군구별 병원 수
-	public long countHospitalsBySigunguName(String sigunguName) {
-		return basicInfoRepo.countHospitalsBySigunguName(sigunguName);
-	}
-
-	// 위치로 조회
-	public List<BasicInfo> findByLocation(double lon, double lat, int distance){
-		return offsetRepo.findByLocation(lon, lat, distance);
+	// 시도별 병원 수 
+	public long countHospitalsBySidoName(String sidoName) {
+		return basicInfoRepo.countHospitalsBySidoName(sidoName);
 	}
 	
-	/*
-	// 상세 정보 조회
-	// 모든 엔티티 들고 올 수 있음
-	@Transactional(readOnly = true)
-	public MedicalDetailDTO getMedicalDetail(String careEncCode) {
-		MedicalInstitution institution = 
-				miRepo.findById(careEncCode).orElseThrow(() -> new IllegalArgumentException("의료기관 없음"));
-		return MedicalDetailDTO.builder()
-				.institution(MedicalInstitutionDTO.from(institution))
-				.departments(mdRepo.findByMedicalInstitution_CareEncCode(careEncCode)
-						.stream().map(MedicalDepartmentDTO::from).toList())
-				.operationInfos(moRepo.findByMedicalInstitution_CareEncCode(careEncCode)
-						.stream().map(MedicalOperationInfoDTO::from).toList())
-				.transports(mtRepo.findByMedicalInstitution_CareEncCode(careEncCode)
-						.stream().map(MedicalTransportDTO::from).toList())
-				.build();
+	// 시군구별 병원 수
+	public long countHospitalsBySigunguName(String sidoName, String sigunguName) {
+		return basicInfoRepo.countHospitalsBySigunguName(sidoName, sigunguName);
 	}
-	*/
+	
+	// 전체 병원 유형
+	
+	// 시군구별 병원 유형
+	
+	// 전체 진료 과목
+	
+	// 시군구별 진료 과목
 }

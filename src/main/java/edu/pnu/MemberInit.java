@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 import edu.pnu.domain.board.Board;
 import edu.pnu.domain.board.Member;
 import edu.pnu.domain.board.Role;
-import edu.pnu.persistence.board.BoardRepository;
-import edu.pnu.persistence.board.MemberRepository;
+import edu.pnu.persistence.BoardRepository;
+import edu.pnu.persistence.MemberRepository;
 import lombok.RequiredArgsConstructor;
 
 @Component

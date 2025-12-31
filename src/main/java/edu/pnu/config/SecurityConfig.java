@@ -13,7 +13,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 
 import edu.pnu.config.filter.JWTAuthenticationFilter;
 import edu.pnu.config.filter.JWTAuthorizatinoFilter;
-import edu.pnu.persistence.board.MemberRepository;
+import edu.pnu.persistence.MemberRepository;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 
@@ -36,7 +36,7 @@ public class SecurityConfig {
 	SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
 		http.csrf(csrf -> csrf.disable());
 		http.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/api/**").authenticated()
+				.requestMatchers("/api/review/**", "/review/**").authenticated()
 				.anyRequest().permitAll());
 		
 		// Form을 이용한 로그인을 사용하지 않겠다는 설정

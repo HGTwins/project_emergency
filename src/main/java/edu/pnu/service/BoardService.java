@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import edu.pnu.domain.board.Board;
-import edu.pnu.persistence.board.BoardRepository;
+import edu.pnu.persistence.BoardRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service

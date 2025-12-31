@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import edu.pnu.domain.board.Member;
 import edu.pnu.domain.board.Role;
-import edu.pnu.persistence.board.MemberRepository;
+import edu.pnu.persistence.MemberRepository;
 import edu.pnu.util.JWTUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import edu.pnu.domain.board.Member;
-import edu.pnu.persistence.board.MemberRepository;
+import edu.pnu.persistence.MemberRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service

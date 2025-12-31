@@ -12,7 +12,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import edu.pnu.domain.board.Member;
-import edu.pnu.persistence.board.MemberRepository;
+import edu.pnu.persistence.MemberRepository;
 import edu.pnu.util.JWTUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
