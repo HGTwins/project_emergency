@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class HospitalTypeCountDTO {
-	private String typeName;
+public class DeptCountDto {
+	private String deptCode;
 	private Long count;
 }

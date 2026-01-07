@@ -17,5 +17,5 @@ public interface SigunguRepository extends JpaRepository<SigunguCode, SigunguCod
 			JOIN sg.sidoCode sd
 			WHERE sd.sidoName = :sidoName
 			""")
-	List<String> findSigunguNamesBySidoName(@Param("sidoName") String sidoName);
+	List<String> getListSigunguNamesBySidoName(@Param("sidoName") String sidoName);
 }

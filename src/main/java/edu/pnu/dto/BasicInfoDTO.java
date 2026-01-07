@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class BasicInfoDTO {
+public class BasicInfoDto {
 	
 	private Long hospitalId;
     private String careEncCode;
@@ -24,8 +24,8 @@ public class BasicInfoDTO {
     private String sigunguCode;
     private String sigunguName;
 
-    public static BasicInfoDTO from(BasicInfo entity) {
-        return BasicInfoDTO.builder()
+    public static BasicInfoDto from(BasicInfo entity) {
+        return BasicInfoDto.builder()
         		.hospitalId(entity.getHospitalId())
                 .careEncCode(entity.getCareEncCode())
                 .institutionName(entity.getInstitutionName())

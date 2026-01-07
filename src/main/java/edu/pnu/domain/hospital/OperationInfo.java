@@ -52,4 +52,40 @@ public class OperationInfo {
 
     @Column(name = "end_monday", length = 8)
     private String endMonday;
+    
+    @Column(name = "start_tuesday", length = 8)
+    private String startTuesday;
+
+    @Column(name = "end_tuesday", length = 8)
+    private String endTuesday;
+    
+    @Column(name = "start_wednesday", length = 8)
+    private String startWednesday;
+
+    @Column(name = "end_wednesday", length = 8)
+    private String endWednesday;
+    
+    @Column(name = "start_thursday", length = 8)
+    private String startThursday;
+
+    @Column(name = "end_thursday", length = 8)
+    private String endThursday;
+    
+    @Column(name = "start_friday", length = 8)
+    private String startFriday;
+
+    @Column(name = "end_friday", length = 8)
+    private String endFriday;
+    
+    @Column(name = "start_saturday", length = 8)
+    private String startSaturday;
+
+    @Column(name = "end_saturday", length = 8)
+    private String endSaturday;
+    
+    @Column(name = "start_sunday", length = 8)
+    private String startSunday;
+
+    @Column(name = "end_sunday", length = 8)
+    private String endSunday;
 }
