@@ -25,6 +25,15 @@ public class OperationInfo {
     private BasicInfo basicInfo;
 
     // ===== 나머지 컬럼 =====
+    @Column(name = "location_place")
+    private String locationPlace;
+    
+    @Column(name = "location_direction")
+    private String locationDirection;
+    
+    @Column(name = "location_distance")
+    private String locationDistance;
+    
     @Column(name = "parking_fee_yn")
     private Boolean parkingFeeYn;
 

@@ -30,6 +30,9 @@ public class MemberService {
 		if (memberRepo.existsById(dto.getUsername())) {
 			throw new RuntimeException("이미 존재하는 아이디입니다.");
 		}
+		if (memberRepo.existsByAlias(dto.getAlias())) {
+			throw new RuntimeException("이미 존재하는 닉네임입니다.");
+		}
 		
 		// 엔티티 생성 및 저장
 		Member member = Member.builder()

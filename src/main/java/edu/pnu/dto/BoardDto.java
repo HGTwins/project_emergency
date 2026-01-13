@@ -3,11 +3,15 @@ package edu.pnu.dto;
 import java.util.Date;
 
 import edu.pnu.domain.board.Board;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class BoardDto {
 
     private Long seq;
@@ -25,7 +29,6 @@ public class BoardDto {
         this.seq = b.getSeq();
         this.content = b.getContent();
         this.createDate = b.getCreateDate();
-        this.cnt = b.getCnt();
         this.username = b.getMember().getUsername();
         this.hospitalId = b.getBasicInfo().getHospitalId();
     }

@@ -17,8 +17,7 @@ public interface BasicInfoRepository extends JpaRepository<BasicInfo, Long> {
 	
 	// 시도명 및 시군구명으로 조회
 	Page<BasicInfo> findBySidoCodeSidoNameAndSigunguCodeSigunguName(@Param("sidoName") String sidoName,
-												@Param("sigunguName") String sigunguName,
-												Pageable pageable);
+												@Param("sigunguName") String sigunguName, Pageable pageable);
 	// 시도별 병원 수
 	Long countBySidoCodeSidoName(@Param("sidoName") String sidoName);
 		
@@ -33,6 +32,7 @@ public interface BasicInfoRepository extends JpaRepository<BasicInfo, Long> {
             JOIN b.offset o
             WHERE o.latitude BETWEEN :swLat AND :neLat
             AND o.longitude BETWEEN :swLng AND :neLng
+            ORDER BY FUNCTION('MD5', b.hospitalId)
 		""")
     List<BasicInfo> getListByLocation(@Param("swLat") double swLat, @Param("neLat") double neLat,
     								@Param("swLng") double swLng, @Param("neLng") double neLng,

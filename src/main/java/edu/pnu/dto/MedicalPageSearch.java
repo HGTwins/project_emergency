@@ -11,5 +11,5 @@ public class MedicalPageSearch {
 	private String sidoName;
 	private String sigunguName;
 	private Integer page = 0;
-	private Integer size = 10;
+	private Integer size = 30000;
 }

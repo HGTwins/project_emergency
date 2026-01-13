@@ -60,9 +60,10 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		
 		// loadUserByUsername에서 만든 객체가 authResult에 담겨져 있다.
 		User user = (User)authResult.getPrincipal();
-		
-		// user 객체를 콘솔에 출력해서 확인
-		// System.out.println("[JWTAuthenticationFilter]auth:" + user);
+		String role = user.getAuthorities().iterator().next().getAuthority();
+
+	    // 헤더에 권한 정보 추가
+	    response.addHeader("role", role);
 		
 		// username으로 JWT 생성
 		String token = JWTUtil.getJWT(user.getUsername());

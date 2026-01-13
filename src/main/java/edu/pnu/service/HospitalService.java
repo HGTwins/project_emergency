@@ -115,7 +115,7 @@ public class HospitalService {
 			essential = deptRepo.getPageByEssentialAndSidoNameAndSigunguName(
 							mps.getSidoName(), mps.getSigunguName(), pageable);
 		}
-		// DTO 변환 및 과목 합치기 (이 예시는 단순화된 로직입니다)
+		// DTO 변환 및 과목 합치기
 	    return essential.map(hospital -> {
 	        // 이 병원의 필수 과목 리스트를 가져와서 문자열로 합침 
 	        String deptNames = hospital.getDeptDoctors().stream()
@@ -125,7 +125,6 @@ public class HospitalService {
 	        
 	        return new EssentialHospitalDto(hospital, deptNames);
 	    });
-		
 	}
 	
 	// 일요일/공휴일 진료 병원 수 (스코어 카드)

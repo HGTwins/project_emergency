@@ -13,7 +13,10 @@ public class OperationInfoDto {
 	// 1. 병원 기본 정보
     private HospitalDto hospital;
 
-    // 2. 주차 및 휴무 정보
+    // 2. 오시는 길, 주차 및 휴무 정보
+    private String locationPlace;
+    private String locationDirection;
+    private String locationDistance;
     private Boolean parkingFeeYn;
     private String parkingNote;
     private String closedSunday;
@@ -44,6 +47,9 @@ public class OperationInfoDto {
         this.hospital = HospitalDto.from(basicInfo);
         
         if (op != null) {
+        	this.locationDirection = op.getLocationDirection();
+        	this.locationDistance = op.getLocationDistance();
+        	this.locationPlace = op.getLocationPlace();
             this.parkingFeeYn = op.getParkingFeeYn();
             this.parkingNote = op.getParkingNote();
             this.closedSunday = op.getClosedSunday();

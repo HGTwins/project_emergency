@@ -2,16 +2,17 @@ package edu.pnu.domain.board;
 
 import java.util.Date;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import edu.pnu.domain.hospital.BasicInfo;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,16 +22,19 @@ import lombok.ToString;
 
 @Setter
 @Getter
-@ToString(exclude = "member")
+@ToString(exclude = {"basicInfo", "member"})
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 public class Board {
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long seq;
-
+	
+	@Column(name = "hospital_id")
+	private Long hospitalId;
+	
     // ===== 연관관계 (읽기 전용) =====
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
@@ -42,14 +46,19 @@ public class Board {
     
 	@Column(nullable = false)
 	private String content;
-	@SuppressWarnings("deprecation")
-	@Temporal(TemporalType.TIMESTAMP)
+	
+	@CreationTimestamp
 	@Column(updatable = false)
 	private Date createDate;
-	@Column(updatable = false)
-	private Long cnt;
 	
-	@ManyToOne
-	@JoinColumn(name = "username", nullable = false, updatable = false)
+	@Column(name = "username")
+	private String username;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+        name = "username", 
+        insertable = false, 
+        updatable = false
+    )
 	private Member member;
 }

@@ -46,7 +46,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 		cookie.setMaxAge(5);	// 5초 => callback을 위한 토큰 임시 전달용이기 때문에 아주 짧게 유지
 		response.addCookie(cookie);
 		
-		// callback.html로 리다이렉트
-		response.sendRedirect("/callback");
+		// callback으로 리다이렉트
+		response.sendRedirect("http://localhost:3000/callback");
 	}
 }

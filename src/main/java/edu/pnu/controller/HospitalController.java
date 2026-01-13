@@ -19,10 +19,10 @@ public class HospitalController {
 	}
 	
 	// oauth2 로그인
-	@GetMapping("/callback")
-	public String callbackPage() {
-		return "callback";
-	}
+//	@GetMapping("/callback")
+//	public String callbackPage() {
+//		return "callback";
+//	}
 	
 	// 시군구별 페이지
 	@GetMapping("/medicalSigungu")

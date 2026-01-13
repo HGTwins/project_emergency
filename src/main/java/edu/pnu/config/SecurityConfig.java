@@ -73,11 +73,12 @@ public class SecurityConfig {
 	
 	private CorsConfigurationSource corsSource() {
 		CorsConfiguration config = new CorsConfiguration();
-		config. setAllowedOriginPatterns(Arrays.asList("http://localhost:3000", "http://127.0.0.1:3000"));
+		config.setAllowedOriginPatterns(Arrays.asList("http://localhost:3000", "http://127.0.0.1:3000"));
 		config.addAllowedMethod(CorsConfiguration.ALL);
 		config.addAllowedHeader(CorsConfiguration.ALL);
 		config.setAllowCredentials(true);
 		config.addExposedHeader(HttpHeaders.AUTHORIZATION);
+		config.addExposedHeader("role");
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", config);
 		return source;
