@@ -62,7 +62,8 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		User user = (User)authResult.getPrincipal();
 		String role = user.getAuthorities().iterator().next().getAuthority();
 
-	    // 헤더에 권한 정보 추가
+	    // 헤더에 사용자 정보 및 권한 정보 추가
+		response.addHeader("username", user.getUsername());
 	    response.addHeader("role", role);
 		
 		// username으로 JWT 생성

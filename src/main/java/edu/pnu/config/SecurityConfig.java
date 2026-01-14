@@ -42,6 +42,7 @@ public class SecurityConfig {
 		http.csrf(csrf -> csrf.disable());
 		http.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/api/review/**").authenticated()
+				.requestMatchers("/api/admin/**", "/admin/**").hasRole("ADMIN")
 				.anyRequest().permitAll());
 		
 		http.cors(cors->cors.configurationSource(corsSource()));
@@ -73,12 +74,13 @@ public class SecurityConfig {
 	
 	private CorsConfigurationSource corsSource() {
 		CorsConfiguration config = new CorsConfiguration();
-		config.setAllowedOriginPatterns(Arrays.asList("http://localhost:3000", "http://127.0.0.1:3000"));
+		config.setAllowedOriginPatterns(Arrays.asList("http://localhost:3000", "http://127.0.0.1:3000", "http://10.125.121.178:3000", "https://nonefficient-lezlie-progressively.ngrok-free.dev"));
 		config.addAllowedMethod(CorsConfiguration.ALL);
 		config.addAllowedHeader(CorsConfiguration.ALL);
 		config.setAllowCredentials(true);
 		config.addExposedHeader(HttpHeaders.AUTHORIZATION);
 		config.addExposedHeader("role");
+		config.addExposedHeader("username");
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", config);
 		return source;

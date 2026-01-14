@@ -4,6 +4,8 @@ import java.util.Date;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import edu.pnu.domain.hospital.BasicInfo;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -42,6 +44,7 @@ public class Board {
             insertable = false,
             updatable = false
     )
+    @JsonIgnore
     private BasicInfo basicInfo;
     
 	@Column(nullable = false)
@@ -60,5 +63,6 @@ public class Board {
         insertable = false, 
         updatable = false
     )
+	@JsonIgnore
 	private Member member;
 }

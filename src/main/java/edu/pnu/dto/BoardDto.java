@@ -24,12 +24,14 @@ public class BoardDto {
     
     // Member 관련 필드
     private String username;
+    private String alias;
 
     public BoardDto(Board b) {
         this.seq = b.getSeq();
         this.content = b.getContent();
         this.createDate = b.getCreateDate();
         this.username = b.getMember().getUsername();
+        this.alias = b.getMember().getAlias();
         this.hospitalId = b.getBasicInfo().getHospitalId();
     }
     

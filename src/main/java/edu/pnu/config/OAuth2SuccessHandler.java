@@ -9,7 +9,6 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 
 import edu.pnu.util.JWTUtil;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
@@ -33,20 +32,14 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 		return Map.of("provider", provider, "email", email);
 	}
 	
-	// Cookie에 JWT를 추가하는 메서드
+	// JWT를 추가하는 메서드
 	void sendJWTtoClient(HttpServletResponse response, String token) throws IOException {
 		// System.out.println("[OAuth2SuccessHandler]token:" + token);
-		// response.addHeader(HttpHeaders.AUTHORIZATION, token); // 응답 헤더에 추가해도 프론트는 못 봄
-		
-		// Cookie에 jwt 추가
-		Cookie cookie = new Cookie("jwtToken", token.replaceAll(JWTUtil.prefix, ""));
-		cookie.setHttpOnly(true); // JS에서 접근 못 하게 => 보안
-		cookie.setSecure(false); // https에서만 동작하려면 true로 변경
-		cookie.setPath("/");
-		cookie.setMaxAge(5);	// 5초 => callback을 위한 토큰 임시 전달용이기 때문에 아주 짧게 유지
-		response.addCookie(cookie);
-		
-		// callback으로 리다이렉트
-		response.sendRedirect("http://localhost:3000/callback");
+		String pureToken = token.replaceAll(JWTUtil.prefix, "").trim();
+	    
+	    // 쿠키를 굽지 않고, URL 파라미터로 토큰을 던져 주기
+	    String targetUrl = "http://localhost:3000/callback?token=" + pureToken;
+	    
+	    response.sendRedirect(targetUrl);
 	}
 }
