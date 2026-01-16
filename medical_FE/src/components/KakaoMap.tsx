@@ -1,153 +1,166 @@
 'use client'
 import { useEffect, useRef, useState } from "react"
 import { CustomOverlayMap, Map, MapMarker, Polygon } from "react-kakao-maps-sdk"
-import sido from "../app/data/sido.json";
-import sigungu from "../app/data/sigungu.json";
 import { HospLocation } from "@/types/HospLocation";
 import OverlayCard from "./OverlayCard";
 import { Fragment } from 'react';
 
-type GeoItem = {
-  name: string;
-  path: { lat: number; lng: number }[][];
-  key: string;
-};
-
 interface KakaoMapProps {
   selectedSido: string;
   selectedSgg: string;
+  setSelectedSido: (sido: string) => void;
+  setSelectedSgg: (sgg: string) => void;
   markers: HospLocation[];
   onBoundsChange: (swLat: number, neLat: number, swLng: number, neLng: number) => void;
-  onZoomChange: (level: number) => void;
   onDetailClick: (id: number) => void;
+  fetchHospCount: (sido?: string, sgg?: string) => Promise<void>; // 병원 수 api 호출
 }
 
-export default function KakaoMap({selectedSido, selectedSgg, markers, onBoundsChange, onZoomChange, onDetailClick}: KakaoMapProps) {
+export default function KakaoMap({selectedSido, selectedSgg, markers, onBoundsChange, onDetailClick, setSelectedSido, setSelectedSgg, fetchHospCount}: KakaoMapProps) {
   const bounds = { // 지도 경계를 벗어나면 돌아가도록 경계 잡기
     sw: { lat: 33.0, lng: 124.0 },
     ne: { lat: 39.0, lng: 132.0 }
   };
-  const [geoList, setGeoList] = useState<GeoItem[]>([]); // 폴리곤 데이터
   const mapRef = useRef<kakao.maps.Map>(null);
   const [selectedMarker, setSelectedMarker] = useState<HospLocation | null>(null);
-
-  // 드래그로 지도 경계를 벗어나면 위치 원상복구
-  function handleDragEnd() {
+  const isMoving = useRef(false); // 코드로 지도를 움직일 때 이벤트 중복 발생을 막기 위한 플래그
+  const refineSidoName = (name: string) => { // 행정구역 명칭을 selectedSido에 맞게 매핑
+    const map: { [key: string]: string } = {
+      "서울특별시": "서울", "부산광역시": "부산", "대구광역시": "대구",
+      "인천광역시": "인천", "광주광역시": "광주", "대전광역시": "대전",
+      "울산광역시": "울산", "세종특별자치시": "세종", "경기도": "경기",
+      "강원특별자치도": "강원", "충청북도": "충북", "충청남도": "충남",
+      "전라북도": "전북", "전북특별자치도": "전북", "전라남도": "전남",
+      "경상북도": "경북", "경상남도": "경남", "제주특별자치도": "제주"
+    };
+    return map[name] || name;
+  };
+  
+  // 현재 지도 위도, 경도의 중심점으로 주소를 확인하는 함수
+  const coord2Region = () => {
     if (!mapRef.current) return;
-    
-    const center = mapRef.current!.getCenter()
-    const lat = center!.getLat()
-    const lng = center!.getLng()
 
-    if(lat < bounds.sw.lat || lat > bounds.ne.lat || lng < bounds.sw.lng || lng > bounds.ne.lng)
-      mapRef.current!.setCenter(new kakao.maps.LatLng(36.5, 127.5))
-  }
+    const center = mapRef.current.getCenter();
+    const geoCoder = new kakao.maps.services.Geocoder();
 
-  // 시도, 시군구 폴리곤 데이터 다루는 함수
-  function handlePolygon(jsonData: any) {
-    if (!jsonData?.features) return; // json 데이터가 없거나 features가 없으면 종료
+    geoCoder.coord2RegionCode(center.getLng(), center.getLat(), (result, status) => {
+      if (status === kakao.maps.services.Status.OK) {
+        // 행정동(H) 우선 탐색, 없으면 법정동(B)
+        const region = result.find(r => r.region_type === 'H') || result[0];
+        const currentSido = region.region_1depth_name;
+        const currentSgg = region.region_2depth_name;
 
-    const features = jsonData.features; // 시도와 시군구의 feature 배열
-    const data: GeoItem[] = []; // 변환된 시도, 시군구 데이터 저장용 배열
+        // 선택된 지역이 있을 때만 이탈 검사
+        if (selectedSido) {
+          const firstChar = selectedSido[0];
+          const lastChar = selectedSido[selectedSido.length - 1];
+          const isSameSido = currentSido.includes(firstChar) && currentSido.includes(lastChar);
+          
+          // 시군구가 선택되어 있다면 시군구까지 체크, 없으면 시도만 체크
+          const isSameSgg = selectedSgg ? currentSgg.includes(selectedSgg) : true;
 
-    for (const item of features) { // 시도, 시군구별 순회
-      const { geometry, properties } = item;
-      if (!geometry || !geometry.type) continue; // geometry가 없거나 type이 없으면 건너뜀
-      const pathList: { lat: number; lng: number }[][] = []; // 해당 시도, 시군구의 모든 폴리곤 경로
-
-      if(geometry.type === "Polygon") {
-        for(const ring of geometry.coordinates) {
-          // GeoJSON: [lng, lat]
-          // KakaoMap: { lat, lng }으로 받아야 함
-          const path = ring.map(([lng, lat]: number[]) => ({lat, lng}));
-          pathList.push(path);
-        }
-      }
-
-      if(geometry.type === "MultiPolygon") {
-        for(const polygon of geometry.coordinates) {
-          for(const ring of polygon) {
-            const path = ring.map(([lng, lat]: number[]) => ({lat, lng}));
-            pathList.push(path);
+          if (!isSameSido || !isSameSgg) {
+            setSelectedSido('');
+            setSelectedSgg('');
           }
         }
       }
+    });
+  };
 
-      // 시도 데이터 하나 완성
-      data.push({
-        name: properties.SIG_KOR_NM,
-        path: pathList,
-        key: properties.CTPRVN_CD || properties.SIG_CD
-      });
+  // 드래그가 끝나면 처리하는 함수
+  const handleDragEnd = () => {
+    if (!mapRef.current || isMoving.current) return;
+
+    // 대한민국 경계를 벗어나면 지도 중앙으로 이동
+    const center = mapRef.current.getCenter();
+    if (center.getLat() < bounds.sw.lat || center.getLat() > bounds.ne.lat || center.getLng() < bounds.sw.lng || center.getLng() > bounds.ne.lng) {
+      mapRef.current.setCenter(new kakao.maps.LatLng(36.5, 127.5));
     }
-    setGeoList(data);
-  }
 
-  function handleMoveByAddr(address: string) {
+    coord2Region();
+  };
+
+  // 줌이 변경되었을 때 처리하는 함수
+  const handleZoom = () => {
+    if (isMoving.current) return; 
+    coord2Region(); 
+  };
+
+  // 주소 정보를 받아 지도를 해당 위치로 이동하는 함수
+  const handleMoveByAddr = (address: string) => {
     if (!mapRef.current) return; // 지도가 없으면 리턴
 
     const geoCoder = new kakao.maps.services.Geocoder(); // 카카오맵 주소-좌표 변환 객체 생성
     geoCoder.addressSearch(address, (result, status) => { // 전달받은 주소를 바탕으로 좌표 검색
       if(status === kakao.maps.services.Status.OK) { // 검색 결과가 정상적으로 들어오면
+        isMoving.current = true;
         const coords = new kakao.maps.LatLng(parseFloat(result[0].y), parseFloat(result[0].x)) // 검색결과 첫번째 항목의 위도, 경도를 추출해 좌표 객체 생성 
         const level = selectedSgg ? 8 : 10; // 시군구가 선택되면, 가깝게 시도가 선택되면 멀게
         
         mapRef.current?.setLevel(level);
         mapRef.current?.panTo(coords);
+
+        setTimeout(() => {
+          isMoving.current = false;
+        }, 1000);
       }
     })
-  }
+  };
 
-  // 움직임이 멈췄을 때, 화면 영역 위도, 경도 값 구하기
-  function handleIdle() {
+  // 움직임이 멈췄을 때 처리하는 함수
+  const handleIdle = () => {
     if (!mapRef.current) return;
 
+    // 위경도 경계 값을 부모에게 알림
     const bounds = mapRef.current.getBounds();
     const sw = bounds.getSouthWest();
     const ne = bounds.getNorthEast();
 
     onBoundsChange(sw.getLat(), ne.getLat(), sw.getLng(), ne.getLng());
+
+    // 줌 레벨에 따른 api 호출
+    const level = mapRef.current.getLevel();
+    // console.log(level);
+    const center = mapRef.current.getCenter();
+    const geoCoder = new kakao.maps.services.Geocoder();
+
+    geoCoder.coord2RegionCode(center.getLng(), center.getLat(), (result, status) => {
+      if (status === kakao.maps.services.Status.OK) {
+        const region = result.find(r => r.region_type === 'H') || result[0];
+
+        if (level == 10 || level == 9) { // 시도 단위
+          const refinedSido = refineSidoName(region.region_1depth_name); // ex) '부산광역시' -> '부산' 변환
+
+          fetchHospCount(refinedSido);
+        } else if (level <= 8) { // 시군구 단위
+          const refinedSido = refineSidoName(region.region_1depth_name);
+          const currentSgg = region.region_2depth_name;
+
+          fetchHospCount(refinedSido, currentSgg);
+        } else if (level >= 11) {
+          fetchHospCount(); // 전국 단위일 때, 파라미터없이 호출
+        }
+      }
+    });
   }
 
   useEffect(()=> {
     if(selectedSido && selectedSgg) {
-      handleMoveByAddr(`${selectedSido} ${selectedSgg}`)
-
-      const targetSido = sido.features.find(feature => feature.properties.SIG_KOR_NM === selectedSido);
-      const sidoCode = targetSido?.properties.CTPRVN_CD || "";
-      const filteredSigungu = { // 시군구 데이터에서 선택된 시군구만 필터링
-        ...sigungu,
-        features: sigungu.features.filter(feature => feature.properties.SIG_KOR_NM === selectedSgg && feature.properties.SIG_CD.startsWith(sidoCode))
-      };
-      handlePolygon(filteredSigungu);
-    } else if(selectedSido) {
-      const refineSido = selectedSido === "광주" ? "광주광역시" : selectedSido; // 광주광역시와 경기도 광주시 구분
-      handleMoveByAddr(refineSido);
-
-      const filteredSido = { // 시도 데이터에서 선택된 시도만 필터링
-        ...sido,
-        features: sido.features.filter(feature =>feature.properties.SIG_KOR_NM === selectedSido)
-      };
-      handlePolygon(filteredSido);
-    }
-    if (!selectedSido && !selectedSgg) {
-      if (mapRef.current) {
-        mapRef.current.setCenter(new kakao.maps.LatLng(36.5, 127.5)); // 전국 중심
-        mapRef.current.setLevel(13); // 초기 줌 레벨
-      }
+      handleMoveByAddr(`${selectedSido} ${selectedSgg}`);
       return;
     }
-  }, [selectedSido, selectedSgg])
 
-   return (
-    <Map center={{ lat: 36.5, lng: 127.5 }} level={13} minLevel={13} style={{ width: "100%", height: "100%" }}
-         onDragEnd={handleDragEnd} ref={mapRef} onIdle={handleIdle}
-         onCreate={(map) => {
-        const bounds = map.getBounds();
-        const sw = bounds.getSouthWest();
-        const ne = bounds.getNorthEast();
-        onBoundsChange(sw.getLat(), ne.getLat(), sw.getLng(), ne.getLng());
-      }}
+    if(selectedSido) {
+      const refineSido = selectedSido === "광주" ? "광주광역시" : selectedSido; // 광주광역시와 경기도 광주시 구분
+      handleMoveByAddr(refineSido);
+      return;
+    }
+  }, [selectedSido, selectedSgg]);
+
+  return (
+    <Map center={{ lat: 36.5, lng: 127.5 }} level={12} minLevel={13} style={{ width: "100%", height: "100%" }}
+         onDragEnd={handleDragEnd} ref={mapRef} onIdle={handleIdle} onCreate={handleIdle} onZoomChanged={handleZoom}
          className="border border-gray-200 rounded-md">
       {markers.map(item => <Fragment key={item.hospitalId}><MapMarker position={{lat: item.latitude, lng: item.longitude }} title={item.institutionName} 
                                       image={{src: "/redMarker.png", size: {width: 40, height: 40}}}
@@ -157,5 +170,5 @@ export default function KakaoMap({selectedSido, selectedSgg, markers, onBoundsCh
           <OverlayCard data={item} onClose={() => setSelectedMarker(null)} onDetailClick={onDetailClick} />
         </CustomOverlayMap>}</Fragment>)}
     </Map>
-  )
+  );
 }

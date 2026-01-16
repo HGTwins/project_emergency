@@ -96,7 +96,7 @@ export default function ReviewSection({ hospitalId }: { hospitalId: number }) {
         <p className="text-gray-600 mb-2">리뷰를 확인하거나 작성하시려면 로그인하세요.</p>
         <Link 
           href="/login" 
-          onClick={() => sessionStorage.setItem("redirectUrl", window.location.pathname)}
+          onClick={() => sessionStorage.setItem("redirectUrl", window.location.href)}
           className="text-blue-500 font-bold hover:underline"
         >
           로그인하러 가기 →

@@ -12,6 +12,7 @@ import { HospCategory } from '@/types/HospCategory';
 import { HospDept } from '@/types/HospDept';
 import { HospLocation } from '@/types/HospLocation';
 import { HospInfo } from '@/types/HospInfo';
+import { useSearchParams } from 'next/navigation';
 
 export default function medicalInfoPage() {
   const [collapsed, setCollapsed] = useState<boolean>(false); // 사이드바 토글
@@ -52,6 +53,11 @@ export default function medicalInfoPage() {
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [pageChange, setPageChange] = useState<(page?: number, sido?: string, sgg?: string) => Promise<void>>(() => async () => {});
+
+  const [selectedHospId, setSelectedHospId] = useState<number | null>(null);
+  const searchParams = useSearchParams();
+
+  const [selectedDeptCode, setSelectedDeptCode] = useState<string | null>(null);
 
   // 병원 수 불러오기
   const fetchHospCount = async(sido?: string, sgg?: string) => {
@@ -123,15 +129,24 @@ export default function medicalInfoPage() {
   }
 
   // 필수의료 운영 병원 수 불러오기
-  const fetchCoreHospCount = async(page?: number, sido?: string, sgg?: string) => {
+  const fetchCoreHospCount = async(page?: number, sido?: string, sgg?: string, deptCode?: string) => {
     let url = `http://10.125.121.178:8080/api/medicalEssential?page=${page}&size=5`;
-    if(sido && sgg) {
-      url += `&sidoName=${encodeURIComponent(sido)}&sigunguName=${encodeURIComponent(sgg)}`;
-    } else if(sido) {
+    if (sido && sgg) {
+      url += `&sidoName=${encodeURIComponent(sido)}&sigunguName=${encodeURIComponent(sgg)}`
+      if(deptCode) {
+        url += `&deptCode=${encodeURIComponent(deptCode)}`
+      } 
+    } else if (sido) {
       url += `&sidoName=${encodeURIComponent(sido)}`
+      if(deptCode) {
+        url += `&deptCode=${encodeURIComponent(deptCode)}`
+      }
+    } else if (deptCode) {
+      url += `&deptCode=${encodeURIComponent(deptCode)}`
     }
-
+  
     try{
+      setIsLoading(true);
       const resp = await fetch(url);
       if(!resp.ok) {
         throw new Error("필수의료 운영 병원 정보를 불러오는데 실패했습니다!");
@@ -143,6 +158,8 @@ export default function medicalInfoPage() {
       setCurrentPage(page!);
     } catch(error) {
       console.error(error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -286,11 +303,15 @@ export default function medicalInfoPage() {
   useEffect(() => {
     fetchSidoList(); // 시도 목록 나타내기
     fetchHospLocation(); 
+    fetchHospCount();
   }, []);
 
   useEffect(() => {
-    if (!selectedSido) return; 
-    fetchSggList(selectedSido); // 시도가 선택되면 시군구 리스트 나타내기
+    if(selectedSido) {
+      fetchSggList(selectedSido); // 시도가 선택되면 시군구 리스트 나타내기
+    } else {
+      setSggList([]);
+    }
   }, [selectedSido]);
 
   useEffect(() => {
@@ -316,7 +337,6 @@ export default function medicalInfoPage() {
     if (selectedSido) return;
 
     const filtered = markers.filter(m => m.latitude >= swLat && m.latitude <= neLat && m.longitude >= swLng && m.longitude <= neLng);
-    // setDisplayMarker(filtered);
 
     if (JSON.stringify(displayMarker) !== JSON.stringify(filtered)) {
       setDisplayMarker(filtered);
@@ -348,8 +368,8 @@ export default function medicalInfoPage() {
           break;
         case 'core':
           setModalTitle("🚨 필수의료 운영 병원");
-          await fetchCoreHospCount(0, selectedSido, selectedSgg);
-          setPageChange(() => fetchCoreHospCount)
+          await fetchCoreHospCount(0, selectedSido, selectedSgg, selectedDeptCode || undefined);
+          setPageChange(() => (page?: number) => fetchCoreHospCount(page, selectedSido, selectedSgg, selectedDeptCode || undefined));
           break;
       }
     } finally {
@@ -359,71 +379,93 @@ export default function medicalInfoPage() {
 
   const handleDetailView = async (hospitalId: number) => {
     setIsLoading(true);
-    setIsModalOpen(true); 
+    setIsModalOpen(true);
+    setModalTitle('');
     setModalData([]);
-
-  try {
-    const resp = await fetch(`http://10.125.121.178:8080/api/medicalId?hospitalId=${hospitalId}`);
-    if (!resp.ok) throw new Error("상세 정보 호출 실패");
-    const data = await resp.json();
     
-    setModalData([data]); 
-    setTotalPages(0);
-    setPageChange(() => async () => {}); 
-  } catch (e) {
-      console.error("상세 정보 로드 실패:", e);
-    }finally {
-      setIsLoading(false);
+    try {
+      const resp = await fetch(`http://10.125.121.178:8080/api/medicalId?hospitalId=${hospitalId}`);
+      if (!resp.ok) throw new Error("상세 정보 호출 실패");
+      const data = await resp.json();
+
+      const delay = new Promise(resolve => setTimeout(resolve, 200));
+      await delay;
+      
+      setModalData([data]); 
+      setTotalPages(1);
+      setPageChange(() => async () => {}); 
+    } catch (e) {
+        console.error("상세 정보 로드 실패:", e);
+      }finally {
+        setIsLoading(false);
+      }
+  }
+
+  // URL의 hospId가 바뀔 때마다 실행되는 Effect
+  useEffect(() => {
+    const hospId = searchParams.get('hospId');
+    if (hospId) {
+      setSelectedHospId(Number(hospId));
+      setIsModalOpen(true);
     }
-  }
+  }, [searchParams])
 
-  const handleInit = () => {
-    setSelectedSido('');
-    setSelectedSgg('');
-    setSggList([]);
-    fetchHospLocation();
-  }
+  useEffect(() => {
+  if (isModalOpen && modalTitle === "🚨 필수의료 운영 병원") {
+    setPageChange(() => (page?: number) => 
+      fetchCoreHospCount(page, selectedSido, selectedSgg, selectedDeptCode || undefined)
+    );
+  } 
+  }, [selectedDeptCode]);
 
+  useEffect(() => {
+    if (!isModalOpen) {
+      setPageChange(() => (page?: number, selectedDeptCode?: string) => 
+        fetchCoreHospCount(page, selectedSido, selectedSgg, selectedDeptCode || undefined)
+      );
+    }
+  }, [isModalOpen]);
 
   return (
     <div className="flex min-h-screen xl:h-screen overflow-hidden">
       <SideBar collapsed={collapsed} setCollapsed={setCollapsed} />
       <div className={`${collapsed ? 'md:pl-16' : 'md:pl-55'} bg-gray-100 relative flex flex-1 mt-14`}> 
+        <Header />
         <main className='flex flex-1 flex-col overflow-hidden'>
-          <Header />
           <div className='p-5 flex-1 min-h-0 grid grid-cols-12 grid-rows-[auto_1fr] gap-4'>
-              <div className='xl:col-span-8 grid grid-cols-4 gap-4 col-span-12'>
-                <ScoreCard title="전체 병원 수" content={totalCount} onOpen={() => handleModalData('total')}
-                           color="blue" imgSrc='hospital'/>
-                <ScoreCard title="야간진료 운영 병원" content={nightHosp} onOpen={() => handleModalData('night')}
-                           color="purple" imgSrc='night' />
-                <ScoreCard title="일요일/공휴일 진료" content={holidayHosp} onOpen={() => handleModalData('holiday')}
-                           color="orange" imgSrc='holiday'/>
-                <ScoreCard title="필수의료 운영 병원" content={coreHosp} onOpen={() => handleModalData('core')}
-                           color="red" imgSrc='emergency'/>
+            <div className='xl:col-span-8 lg:grid-cols-4 grid grid-cols-2 gap-4 col-span-12 order-first xl:order-0'>
+              <ScoreCard title="전체 병원 수" content={totalCount} onOpen={() => handleModalData('total')}
+                         color="blue" imgSrc='hospital'/>
+              <ScoreCard title="야간진료 운영 병원" content={nightHosp} onOpen={() => handleModalData('night')}
+                         color="purple" imgSrc='night' />
+              <ScoreCard title="일요일/공휴일 진료" content={holidayHosp} onOpen={() => handleModalData('holiday')}
+                         color="orange" imgSrc='holiday'/>
+              <ScoreCard title="필수의료 운영 병원" content={coreHosp} onOpen={() => handleModalData('core')}
+                         color="red" imgSrc='emergency'/>
+            </div>
+            <Modal isOpen={isModalOpen} onClose={() => {setIsModalOpen(false); setSelectedHospId(null); window.history.replaceState(null, '', window.location.pathname);}}
+                   selectedHospId={selectedHospId!} setSelectedHospId={setSelectedHospId} setSelectedDeptCode={setSelectedDeptCode}
+                   title={modalTitle} data={modalData} isLoading={isLoading}
+                   currentPage={currentPage} totalPages={totalPages} onPageChange={pageChange}/>
+            <div className='xl:col-span-4 xl:row-span-2 flex xl:flex-col flex-col lg:flex-row min-h-0 gap-4 col-span-12 order-last xl:order-0'>
+              <div className='flex-1 min-h-75'>
+                <Dashboard title="병원 유형별 통계" series={categoryData.series} labels={categoryData.labels} type="donut" />
               </div>
-              <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={modalTitle} data={modalData} isLoading={isLoading}
-                      currentPage={currentPage} totalPages={totalPages} onPageChange={pageChange}/>
-              <div className='xl:col-span-4 row-span-2 flex xl:flex-col flex-row min-h-0 gap-4 col-span-12'>
-                <div className='flex-1 min-h-75'>
-                  <Dashboard title="병원 유형별 통계" series={categoryData.series} labels={categoryData.labels} type="donut" />
-                </div>
-                <div className='flex-1 min-h-75'>
-                  <Dashboard title='진료 과목별 통계' series={deptData.series} labels={deptData.labels} type="bar"/>
-                </div>
+              <div className='flex-1 min-h-75'>
+                <Dashboard title='진료 과목별 통계' series={deptData.series} labels={deptData.labels} type="bar"/>
               </div>
-              <div className='xl:col-span-8 min-h-0 p-5 bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col col-span-12'>
-                <div className='flex mb-3 gap-4 p-2'>
-                  <SelectBox label='시도' options={sidoList} value={selectedSido} sidoChange={handleSidoChange}/>
-                  <SelectBox label='시군구' options={sggList} value={selectedSgg} sidoChange={setSelectedSgg}/>
-                </div>
-                <div className='relative flex-1 min-h-125'>
-                  {selectedSido || selectedSgg ? <button className='absolute bg-blue-500 hover:bg-blue-400 bottom-6 left-1/2 -translate-x-1/2 z-20 text-white rounded-full px-5 py-2 shadow-sm transition-all cursor-pointer shadow'
-                                                          onClick={handleInit}>🔄 초기화</button> : ''}
-                  <KakaoMap selectedSido={selectedSido} selectedSgg={selectedSgg} onDetailClick={handleDetailView}
-                            markers={displayMarker} onBoundsChange={handleBoundsChange} onZoomChange={fetchHospLocation} />
-                </div>
+            </div>
+            <div className='xl:col-span-8 min-h-0 p-5 bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col col-span-12'>
+              <div className='flex mb-3 gap-4 p-2'>
+                <SelectBox label='시도' options={sidoList} value={selectedSido} sidoChange={handleSidoChange}/>
+                <SelectBox label='시군구' options={sggList} value={selectedSgg} sidoChange={setSelectedSgg}/>
               </div>
+              <div className='relative flex-1 min-h-125 order-second xl:order-0'>
+                <KakaoMap selectedSido={selectedSido} selectedSgg={selectedSgg} onDetailClick={handleDetailView}
+                          markers={displayMarker} onBoundsChange={handleBoundsChange} fetchHospCount={fetchHospCount}
+                          setSelectedSido={setSelectedSido} setSelectedSgg={setSelectedSgg} />
+              </div>
+            </div>
           </div>
         </main>
       </div>
