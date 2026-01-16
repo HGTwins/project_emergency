@@ -15,7 +15,9 @@ export default function JoinPage() {
 
   // 중복 확인 결과 상태
   const [usernameChecked, setUsernameChecked] = useState<boolean>(false);
+  const [usernameStatus, setUsernameStatus] = useState<'none' | 'success' | 'error'>('none');
   const [aliasChecked, setAliasChecked] = useState<boolean>(false);
+  const [aliasStatus, setAliasStatus] = useState<'none' | 'success' | 'error'>('none');
 
   const [passwordMsg, setPasswordMsg] = useState<string>(''); // 비밀번호 일치 메시지 상태
 
@@ -24,8 +26,14 @@ export default function JoinPage() {
     setFormData(prev => ({ ...prev, [name]: value }));
     
     // 아이디나 닉네임을 수정하면 중복 결과 초기화
-    if (name === 'username') setUsernameChecked(false);
-    if (name === 'alias') setAliasChecked(false);
+    if (name === 'username') {
+      setUsernameChecked(false);
+      setUsernameStatus('none');
+    }
+    if (name === 'alias') {
+      setAliasChecked(false);
+      setAliasStatus('none');
+    }
   }
 
   // 백엔드 api를 호출해서 사용 가능한 값인지 확인
@@ -37,14 +45,24 @@ export default function JoinPage() {
       const response = await fetch(`http://10.125.121.178:8080/api/check-duplicate?type=${type}&value=${value}`);
 
       if (response.ok) {
-        alert(`사용 가능한 ${type === 'username' ? '아이디' : '닉네임'}입니다.`);
-        if (type === 'username') setUsernameChecked(true);
-        if (type === 'alias') setAliasChecked(true);
+        if (type === 'username') {
+          setUsernameChecked(true);
+          setUsernameStatus('success');
+        }
+        if (type === 'alias') {
+          setAliasChecked(true);
+          setAliasStatus('success');
+        }
       } else {
-        alert(`이미 사용 중인 ${type === 'username' ? '아이디' : '닉네임'}입니다.`);
-      }
+          if (type === 'username') {
+            setUsernameStatus('error');
+          }
+          if (type === 'alias') {
+            setAliasStatus('error');
+          }
+        }
     } catch (error) {
-      alert("연결 오류가 발생했습니다.");
+        alert("연결 오류가 발생했습니다.");
     }
   }
 
@@ -101,19 +119,35 @@ export default function JoinPage() {
             <label className='block mb-1 text-xs font-semibold'>아이디</label>
             <div className='relative flex items-center'>
               <input type='text' name='username' placeholder='아이디를 입력하세요.' onChange={handleChange} required 
-                     className='w-full bg-gray-50 p-2.5 border border-gray-300 text-gray-700 rounded-lg focus:ring-2 focus:ring-[#204571] outline-none transition-all' />
+                     className={`w-full bg-gray-50 p-2.5 border text-gray-700 rounded-lg outline-none transition-all
+                                ${usernameStatus === 'error' ? 'border-red-500 focus:ring-2 focus:ring-red-200' // 에러 상태
+                                : usernameStatus === 'success' ? 'border-blue-500 focus:ring-2 focus:ring-blue-100' // 성공 상태
+                                : 'border-gray-300 focus:ring-2 focus:ring-[#204571]' // 기본 상태
+                              }`} />
               <button type='button' onClick={() => checkDuplicate('username')} 
-                      className='absolute right-2 px-3 py-1.5 w-20 bg-[#475569] rounded-lg text-sm text-white transition-all'>{usernameChecked ? "확인완료" : "중복확인"}</button>
+                      className={`absolute right-2 px-3 py-1.5 w-20 rounded-lg text-sm text-white transition-all 
+                                ${usernameChecked ? "bg-blue-600" : "bg-[#475569] hover:bg-[#334155]"}`}>{usernameChecked ? "확인완료" : "중복확인"}
+              </button>
             </div>
+            {usernameStatus === 'success' && (<p className="text-xs text-blue-600 ml-1">사용할 수 있는 아이디입니다.</p>)}
+            {usernameStatus === 'error' && (<p className="text-xs text-red-500 ml-1">이미 사용 중인 아이디입니다.</p>)}
           </div>
           <div className='space-y-1'>
             <label className='block mb-1 text-xs font-semibold'>닉네임</label>
             <div className='relative flex items-center'>
               <input type='text' name='alias' placeholder='닉네임을 입력하세요.' onChange={handleChange} required 
-                     className='w-full bg-gray-50 p-2.5 border border-gray-300 text-gray-700 rounded-lg focus:ring-2 focus:ring-[#204571] outline-none transition-all'/>
+                     className={`w-full bg-gray-50 p-2.5 border rounded-lg outline-none transition-all 
+                                ${aliasStatus === 'error' ? 'border-red-500 focus:ring-2 focus:ring-red-200' // 에러 상태
+                                : aliasStatus === 'success' ? 'border-blue-500 focus:ring-2 focus:ring-blue-100' // 성공 상태
+                                : 'border-gray-300 focus:ring-2 focus:ring-[#204571]' // 기본 상태
+                              }`}/>
               <button type='button' onClick={() => checkDuplicate('alias')} 
-                      className='absolute right-2 px-3 py-1.5 w-20 bg-[#475569] rounded-lg text-sm text-white transition-all'>{aliasChecked ? "확인완료" : "중복확인"}</button>
+                      className={`absolute right-2 px-3 py-1.5 w-20 rounded-lg text-sm text-white transition-all 
+                                ${aliasChecked ? "bg-blue-600" : "bg-[#475569] hover:bg-[#334155]"}`}>{aliasChecked ? "확인완료" : "중복확인"}
+              </button>
             </div>
+            {aliasStatus === 'success' && (<p className="text-xs text-blue-600 ml-1">사용할 수 있는 닉네임입니다.</p>)}
+            {aliasStatus === 'error' && (<p className="text-xs text-red-500 ml-1">이미 사용 중인 닉네임입니다.</p>)}
           </div>
           <div className='space-y-1'>
             <label className='block mb-1 text-xs font-semibold'>비밀번호</label>

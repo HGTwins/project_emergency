@@ -1,14 +1,12 @@
 'use client';
 
 import { HospLocation } from "@/types/HospLocation";
-import { useState } from 'react';
 
 interface OverlayCardProps {
-  data: HospLocation,
-  onClose: () => void,
+  data: HospLocation;
+  onClose: () => void;
   onDetailClick: (id: number) => void;
 }
-
 
 export default function OverlayCard({data, onClose, onDetailClick}: OverlayCardProps) {
   return (
