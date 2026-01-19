@@ -1,18 +1,24 @@
 'use client'
 import { Suspense, useEffect, useState } from 'react';
-import KakaoMap from '@/components/KakaoMap';
+import dynamic from 'next/dynamic';
+const Dashboard = dynamic(() => import('@/components/Dashboard'), { ssr: false });
+const KakaoMap = dynamic( async () => {
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    return import('@/components/KakaoMap');
+  },
+  { ssr: false, loading: () => <MapLoading />}
+);
+import MapLoading from '@/components/MapLoading';
 import SideBar from '@/components/SideBar';
 import Header from '@/components/Header';
 import ScoreCard from '@/components/ScoreCard';
 import SelectBox from '@/components/SelectBox';
 import Modal from '@/components/Modal';
-import dynamic from 'next/dynamic';
-const Dashboard = dynamic(() => import('@/components/Dashboard'), { ssr: false });
 import { HospCategory } from '@/types/HospCategory';
 import { HospDept } from '@/types/HospDept';
 import { HospLocation } from '@/types/HospLocation';
 import { HospInfo } from '@/types/HospInfo';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 function MedicalInfoContent() {
   const [collapsed, setCollapsed] = useState<boolean>(false); // 사이드바 토글
@@ -29,7 +35,7 @@ function MedicalInfoContent() {
   const [modalTitle, setModalTitle] = useState<string>(''); // 스코어 카드별 모달 제목
   const [isLoading, setIsLoading] = useState<boolean>(false); // 로딩 유무
   const [currentRegion, setCurrentRegion] = useState({ sido: '', sgg: '' }); // 시도, 시군구 지역 정보(지도 이동/드래그 시 파라미터로 넘김)
-  const [selectedDeptCode, setSelectedDeptCode] = useState<string | null>(null); // 필수의료 과목
+  const [selectedDeptCode, setSelectedDeptCode] = useState<string | null>(null); // 필수의료 과목 선택
 
   // 지도 관련 변수
   const [sidoList, setSidoList] = useState<string[]>([]); // 시도 목록
@@ -58,12 +64,14 @@ function MedicalInfoContent() {
   const [totalPages, setTotalPages] = useState<number>(0); // 전체 페이지
 
   const [pageChange, setPageChange] = useState<(page?: number, sido?: string, sgg?: string) => Promise<void>>(() => async () => {});
-  const [selectedHospId, setSelectedHospId] = useState<number | null>(null);
+
+  const router = useRouter();
   const searchParams = useSearchParams();
+  const [selectedHospId, setSelectedHospId] = useState<number | null>(null);
 
   // 병원 수 불러오기
   const fetchTotalCount = async(sido?: string, sgg?: string) => {
-    let url = 'http://10.125.121.178:8080/api/medicalCountHospital';
+    let url = 'https://project-hospital.onrender.com/api/medicalCountHospital';
     if(sido && sgg) {
       url += `?sidoName=${encodeURIComponent(sido)}&sigunguName=${encodeURIComponent(sgg)}`;
     } else if(sido) {
@@ -84,7 +92,7 @@ function MedicalInfoContent() {
 
   // 야간진료 운영 병원 수 불러오기
   const fetchNightCount = async(sido?: string, sgg?: string) => {
-    let url = `http://10.125.121.178:8080/api/medicalNight?`;
+    let url = `https://project-hospital.onrender.com/api/medicalNight?`;
     if(sido && sgg) {
       url += `sidoName=${encodeURIComponent(sido)}&sigunguName=${encodeURIComponent(sgg)}`;
     } else if(sido) {
@@ -105,7 +113,7 @@ function MedicalInfoContent() {
 
   // 공휴일 운영 병원 수 불러오기
   const fetchHolidayCount = async(sido?: string, sgg?: string) => {
-    let url = `http://10.125.121.178:8080/api/medicalHoliday?`;
+    let url = `https://project-hospital.onrender.com/api/medicalHoliday?`;
     if(sido && sgg) {
       url += `sidoName=${encodeURIComponent(sido)}&sigunguName=${encodeURIComponent(sgg)}`;
     } else if(sido) {
@@ -126,7 +134,7 @@ function MedicalInfoContent() {
 
   // 필수의료 운영 병원 수 불러오기
   const fetchCoreCount = async(sido?: string, sgg?: string, deptCode?: string) => {
-    let url = `http://10.125.121.178:8080/api/medicalEssential?`;
+    let url = `https://project-hospital.onrender.com/api/medicalEssential?`;
     if (sido && sgg) {
       url += `sidoName=${encodeURIComponent(sido)}&sigunguName=${encodeURIComponent(sgg)}`
     } else if (sido) {
@@ -148,7 +156,7 @@ function MedicalInfoContent() {
   // select 박스의 시도 목록 불러오기
   const fetchSidoList = async() => {
     try{
-      const resp = await fetch('http://10.125.121.178:8080/api/sidoName');
+      const resp = await fetch('https://project-hospital.onrender.com/api/sidoName');
       if(!resp.ok) {
         throw new Error('시도 정보를 불러오는데 실패했습니다!');
       }
@@ -162,7 +170,7 @@ function MedicalInfoContent() {
   // select 박스의 시군구 목록 불러오기
   const fetchSggList = async(sido: string) => {
     try{
-      const resp = await fetch(`http://10.125.121.178:8080/api/sigunguName?sidoName=${encodeURIComponent(sido)}`);
+      const resp = await fetch(`https://project-hospital.onrender.com/api/sigunguName?sidoName=${encodeURIComponent(sido)}`);
       if(!resp.ok) {
         throw new Error('시군구 정보를 불러오는데 실패했습니다!');
       }
@@ -173,9 +181,9 @@ function MedicalInfoContent() {
     }
   };
 
-  // 병원 간단정보 불러오기(마커(시군구 선택 시 모두 표시), 모달 창)
+  // 전체 병원 수 - 스코어카드 데이터 불러오기
   const fetchHospInfo = async (page?: number, sido?: string, sgg?: string) => {
-    let url = `http://10.125.121.178:8080/api/medicalInfo?page=${page}&size=5`
+    let url = `https://project-hospital.onrender.com/api/medicalInfo?page=${page}&size=5`
     if(sido && sgg) {
       url += `&sidoName=${encodeURIComponent(sido)}&sigunguName=${encodeURIComponent(sgg)}`;
     } else if(sido) {
@@ -206,7 +214,7 @@ function MedicalInfoContent() {
 
   // 야간진료 - 스코어카드 데이터 불러오기
   const fetchNightHosp = async(page?: number, sido?: string, sgg?: string) => {
-    let url = `http://10.125.121.178:8080/api/medicalNight?page=${page}&size=5`;
+    let url = `https://project-hospital.onrender.com/api/medicalNight?page=${page}&size=5`;
     if(sido && sgg) {
       url += `&sidoName=${encodeURIComponent(sido)}&sigunguName=${encodeURIComponent(sgg)}`;
     } else if(sido) {
@@ -229,7 +237,7 @@ function MedicalInfoContent() {
 
   // 공휴일 - 스코어카드 데이터 불러오기
   const fetchHolidayHosp = async(page?: number, sido?: string, sgg?: string) => {
-    let url = `http://10.125.121.178:8080/api/medicalHoliday?page=${page}&size=5`;
+    let url = `https://project-hospital.onrender.com/api/medicalHoliday?page=${page}&size=5`;
     if(sido && sgg) {
       url += `&sidoName=${encodeURIComponent(sido)}&sigunguName=${encodeURIComponent(sgg)}`;
     } else if(sido) {
@@ -252,7 +260,7 @@ function MedicalInfoContent() {
 
   // 필수의료 - 스코어카드 데이터 불러오기
   const fetchCoreHosp = async(page?: number, sido?: string, sgg?: string, deptCode?: string) => {
-    let url = `http://10.125.121.178:8080/api/medicalEssential?page=${page}&size=5`;
+    let url = `https://project-hospital.onrender.com/api/medicalEssential?page=${page}&size=5`;
     if (sido && sgg) {
       url += `&sidoName=${encodeURIComponent(sido)}&sigunguName=${encodeURIComponent(sgg)}`
       if(deptCode) {
@@ -287,7 +295,7 @@ function MedicalInfoContent() {
 
   // 병원 유형 불러오기
   const fetchHospCategory = async(sido?: string, sgg?: string) => {
-    let url = 'http://10.125.121.178:8080/api/medicalType';
+    let url = 'https://project-hospital.onrender.com/api/medicalType';
     if(sido && sgg) {
       url += `?sidoName=${encodeURIComponent(sido)}&sigunguName=${encodeURIComponent(sgg)}`;
     } else if(sido) {
@@ -308,7 +316,7 @@ function MedicalInfoContent() {
 
   // 병원 진료과목 불러오기
   const fetchHospDept = async(sido?: string, sgg?: string) => {
-    let url = 'http://10.125.121.178:8080/api/medicalDept?topN=5';
+    let url = 'https://project-hospital.onrender.com/api/medicalDept?topN=5';
     if(sido && sgg) {
       url += `&sidoName=${encodeURIComponent(sido)}&sigunguName=${encodeURIComponent(sgg)}`;
     } else if(sido) {
@@ -330,7 +338,7 @@ function MedicalInfoContent() {
   // 병원 위치정보 불러오기(마커, 커스텀 오버레이)
   const fetchHospLocation = async(level?: number) => {
     try{
-      const resp = await fetch(`http://10.125.121.178:8080/api/medicalLocation?${level}`);
+      const resp = await fetch(`https://project-hospital.onrender.com/api/medicalLocation?${level}`);
       if(!resp.ok) {
         throw new Error("병원 위치 정보를 불러오는데 실패했습니다!");
       }
@@ -342,9 +350,8 @@ function MedicalInfoContent() {
     }
   }
 
-
   const fetchHospInfo2 = async (sido?: string, sgg?: string) => {
-    let url = `http://10.125.121.178:8080/api/medicalInfo?size=7000`
+    let url = `https://project-hospital.onrender.com/api/medicalInfo?size=7000`
     if(sido && sgg) {
       url += `&sidoName=${encodeURIComponent(sido)}&sigunguName=${encodeURIComponent(sgg)}`;
     } else if(sido) {
@@ -450,13 +457,18 @@ function MedicalInfoContent() {
   };
 
   const handleDetailView = async (hospitalId: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('hospId', hospitalId.toString());
+    router.push(`${window.location.pathname}?${params.toString()}`);
+    
     setIsLoading(true);
     setIsModalOpen(true);
     setModalTitle('');
     setModalData([]);
+    setSelectedHospId(hospitalId);
     
     try {
-      const resp = await fetch(`http://10.125.121.178:8080/api/medicalId?hospitalId=${hospitalId}`);
+      const resp = await fetch(`https://project-hospital.onrender.com/api/medicalId?hospitalId=${hospitalId}`);
       if (!resp.ok) throw new Error("상세 정보 호출 실패");
       const data = await resp.json();
 
@@ -476,11 +488,33 @@ function MedicalInfoContent() {
   // URL의 hospId가 바뀔 때마다 실행되는 Effect
   useEffect(() => {
     const hospId = searchParams.get('hospId');
-    if (hospId) {
-      setSelectedHospId(Number(hospId));
-      setIsModalOpen(true);
+    
+    // URL에 hospId는 있는데, 현재 모달에 데이터가 없는 경우 (로그인 후 리다이렉트 상황)
+    if (hospId && modalData.length === 0 && !isLoading) {
+      const fetchRestoreDetail = async () => {
+        const hospitalId = Number(hospId);
+        setIsLoading(true);
+        setIsModalOpen(true);
+        setSelectedHospId(hospitalId);
+        
+        try {
+          const resp = await fetch(`https://project-hospital.onrender.com/api/medicalId?hospitalId=${hospitalId}`);
+          if (resp.ok) {
+            const data = await resp.json();
+            setModalData([data]);
+            setTotalPages(1);
+            setPageChange(() => async () => {});
+          }
+        } catch (e) {
+          console.error("데이터 복구 실패:", e);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      fetchRestoreDetail();
     }
-  }, [searchParams])
+  }, [searchParams, modalData.length]);
 
   useEffect(() => {
   if (isModalOpen && modalTitle === "🚨 필수의료 운영 병원") {
@@ -492,13 +526,6 @@ function MedicalInfoContent() {
     );
   } 
   }, [selectedDeptCode]);
-
-  // useEffect(() => {
-  //   if (!isModalOpen) {
-  //     setPageChange(() => (page?: number, selectedDeptCode?: string) =>
-  //     fetchCoreHosp(page, selectedSido, selectedSgg, selectedDeptCode || undefined)
-  //   )}
-  // }, [isModalOpen]);
 
   return (
     <div className="flex min-h-screen xl:h-screen overflow-hidden">
@@ -517,13 +544,19 @@ function MedicalInfoContent() {
               <ScoreCard title="필수의료 운영 병원" content={coreCount} onOpen={() => handleModalData('core')}
                          color="red" imgSrc='emergency'/>
             </div>
-            <Modal isOpen={isModalOpen} onClose={() => {setIsModalOpen(false); setSelectedHospId(null); window.history.replaceState(null, '', window.location.pathname);}}
+            <Modal isOpen={isModalOpen} onClose={() => {setIsModalOpen(false); setSelectedHospId(null); 
+                   const params = new URLSearchParams(searchParams.toString());
+                   params.delete('hospId');
+                   router.push(window.location.pathname);}}
                    selectedHospId={selectedHospId!} setSelectedHospId={setSelectedHospId} setSelectedDeptCode={setSelectedDeptCode}
                    title={modalTitle} data={modalData} isLoading={isLoading}
                    currentPage={currentPage} totalPages={totalPages} onPageChange={pageChange}/>
             <div className='xl:col-span-4 xl:row-span-2 flex xl:flex-col flex-col lg:flex-row min-h-0 gap-4 col-span-12 order-last xl:order-0'>
               <div className='flex-1 min-h-75'>
-                <Dashboard title="병원 유형별 통계" series={categoryData.series} labels={categoryData.labels} type="donut" />
+                {
+                  categoryData ? <Dashboard title="병원 유형별 통계" series={categoryData.series} labels={categoryData.labels} type="donut" /> : 
+                  <p>정보가 없습니다!</p> 
+                }
               </div>
               <div className='flex-1 min-h-75'>
                 <Dashboard title='진료 과목별 통계' series={deptData.series} labels={deptData.labels} type="bar"/>

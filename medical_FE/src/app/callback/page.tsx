@@ -6,16 +6,24 @@ export default function OAuth2Callback() {
     const router = useRouter();
 
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const token = params.get("token"); // URL에서 token 추출
-        const username = params.get("username");
+        const fetchCallback = async () => {
+            try {
+                const response = await fetch("https://project-hospital.onrender.com/api/jwtcallback", {
+                    method: "POST",
+                    credentials: "include", // 쿠키포함
+                });
+                if (response.ok) {
+                    const params = new URLSearchParams(window.location.search);
+                    const username = params.get("username")
 
         if (token && username) {
             sessionStorage.setItem("jwtToken", "Bearer " + token);
             sessionStorage.setItem("username", username);
             sessionStorage.setItem("role", "ROLE_MEMBER");
 
-            const fetchCallback = async () => {
+                    const resp = await fetch(`https://project-hospital.onrender.com/api/getMember/${username}`)
+                    const data = await resp.json()
+                    const alias = data.alias
 
                 try {
                     const resp = await fetch(`https://nonefficient-lezlie-progressively.ngrok-free.dev/api/getMember/${username}`, {
@@ -32,12 +40,12 @@ export default function OAuth2Callback() {
                     // alias 정보 못가져와도 로그인은 된 상태이므로 이동 가능
                     router.push('/medicalInfo');
                 }
-            };
-            fetchCallback();
-        } else {
-            alert("인증 실패: 토큰이 없습니다.");
-            router.push("/");
-        }
-    }, [router]);
-    return <p>로그인 처리 중...</p>;
+            } catch (err) {
+                alert("서버 요청 오류");
+                router.push("/");
+            }
+        };
+        fetchCallback();
+    }, []);
+    return <></>;
 };
