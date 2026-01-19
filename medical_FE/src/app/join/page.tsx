@@ -21,6 +21,10 @@ export default function JoinPage() {
 
   const [passwordMsg, setPasswordMsg] = useState<string>(''); // 비밀번호 일치 메시지 상태
 
+  // 유효성 검사
+  const [passwordRule, setPasswordRule] = useState<string>('');
+  const [usernameRule, setUsernameRule] = useState<string>('');
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -33,6 +37,20 @@ export default function JoinPage() {
     if (name === 'alias') {
       setAliasChecked(false);
       setAliasStatus('none');
+    }
+  }
+
+  // 유효성 검사 규칙
+  const validationRules = {
+    // 아이디: 영문 소문자, 숫자 조합 / 5~20자
+    username: (value: any) => {
+      const regex = /^[a-z0-9]{5,20}$/;
+      return regex.test(value) || "아이디는 영문 소문자와 숫자 조합으로 5 ~ 20자여야 합니다."
+    },
+    // 비밀번호: 영문, 숫자, 특수문자 포함 / 8~20자
+    password: (value: any) => {
+      const regex = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,20}$/;
+      return regex.test(value) || "비밀번호는 영문, 숫자, 특수문자를 포함하여 8~20자여야 합니다."
     }
   }
 
@@ -108,6 +126,28 @@ export default function JoinPage() {
     }
   }, [formData.password, formData.confirmPassword]);
 
+
+  // 아이디 입력란, 비밀번호 입력란 바뀔 시 유효성 검사
+  useEffect(() => {
+    const result = validationRules.username(formData.username);
+    
+    if (result === true) {
+      setUsernameRule('');
+    } else {
+      setUsernameRule(result);
+    }
+  }, [formData.username])
+
+  useEffect(() => {
+    const result = validationRules.password(formData.password);
+    
+    if (result === true) {
+      setPasswordRule('');
+    } else {
+      setPasswordRule(result);
+    }
+  }, [formData.password])
+
   return (
     <>
     <Header />
@@ -131,6 +171,7 @@ export default function JoinPage() {
             </div>
             {usernameStatus === 'success' && (<p className="text-xs text-blue-600 ml-1">사용할 수 있는 아이디입니다.</p>)}
             {usernameStatus === 'error' && (<p className="text-xs text-red-500 ml-1">이미 사용 중인 아이디입니다.</p>)}
+            {usernameRule && (<p className="text-xs text-red-500 ml-1">{usernameRule}</p>)}
           </div>
           <div className='space-y-1'>
             <label className='block mb-1 text-xs font-semibold'>닉네임</label>
@@ -153,6 +194,7 @@ export default function JoinPage() {
             <label className='block mb-1 text-xs font-semibold'>비밀번호</label>
             <input type='password' name='password' value={formData.password} placeholder='비밀번호를 입력하세요.' onChange={handleChange} required 
                    className='w-full bg-gray-50 p-2.5 border border-gray-300 text-gray-700 rounded-lg focus:ring-2 focus:ring-[#204571] outline-none transition-all'/>
+            {passwordRule && (<p className="text-xs text-red-500 ml-1">{passwordRule}</p>)}
           </div>
           <div className='space-y-1'>
             <label className='block mb-1 text-xs font-semibold'>비밀번호 확인</label>
@@ -160,7 +202,7 @@ export default function JoinPage() {
                    className='w-full bg-gray-50 p-2.5 border border-gray-300 text-gray-700 rounded-lg focus:ring-2 focus:ring-[#204571] outline-none transition-all'/>
             {passwordMsg && <p className={`text-xs mt-1 ${formData.password === formData.confirmPassword ? 'text-blue-500' : 'text-red-500'}`}>{passwordMsg}</p>}
           </div>
-          <button type='submit' disabled={formData.password !== formData.confirmPassword || formData.confirmPassword === ''}
+          <button type='submit' disabled={formData.password !== formData.confirmPassword || formData.confirmPassword === '' || passwordRule !== '' || usernameRule !== ''}
                   className='w-full bg-[#41abdd] hover:bg-[#3fa4d3] text-white text-center px-5 py-2.5 rounded-lg font-medium mt-3 transition-all'>
             <span>가입하기</span>
           </button>
