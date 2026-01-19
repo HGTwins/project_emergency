@@ -17,31 +17,28 @@ export default function OAuth2Callback() {
 
             const fetchCallback = async () => {
 
-                const resp = await fetch(`https://nonefficient-lezlie-progressively.ngrok-free.dev/api/getMember/${username}`)
-                const data = await resp.json()
-                const alias = data.alias;
-
-                sessionStorage.setItem('alias', alias!);
-
-                alert("로그인 성공!");
-
-                // 로그인 성공 로직 내부
-                const redirectUrl = sessionStorage.getItem('redirectUrl');
-
-                if (redirectUrl) {
-                    // 저장된 URL이 있으면 해당 페이지로 이동 후 데이터 삭제
-                    sessionStorage.removeItem('redirectUrl');
-                    router.push(redirectUrl);
-                } else {
-                    // 저장된 URL이 없으면 기본 페이지(예: 메인)로 이동
+                try {
+                    const resp = await fetch(`https://nonefficient-lezlie-progressively.ngrok-free.dev/api/getMember/${username}`, {
+                        headers: { 
+                            "Authorization": "Bearer " + token,
+                            "ngrok-skip-browser-warning": "true" // ngrok 경고창 방지
+                        }
+                    });
+                    const data = await resp.json();
+                    sessionStorage.setItem('alias', data.alias);
+                    
+                    alert("로그인 성공!");
+                    router.push('/medicalInfo');
+                } catch (err) {
+                    // alias 정보 못가져와도 로그인은 된 상태이므로 이동 가능
                     router.push('/medicalInfo');
                 }
             };
             fetchCallback();
         } else {
-        alert("인증 정보가 없습니다.");
-        router.push("/");
-    }
-    }, []);
+            alert("인증 실패: 토큰이 없습니다.");
+            router.push("/");
+        }
+    }, [router]);
     return <p>로그인 처리 중...</p>;
 };
