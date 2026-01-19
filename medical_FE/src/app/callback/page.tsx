@@ -27,7 +27,6 @@ export default function OAuth2Callback() {
                     const data = await resp.json();
                     sessionStorage.setItem('alias', data.alias);
                     
-                    alert("로그인 성공!");
                     router.push('/medicalInfo');
                 } catch (err) {
                     // alias 정보 못가져와도 로그인은 된 상태이므로 이동 가능
