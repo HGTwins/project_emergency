@@ -23,7 +23,6 @@ export default function OAuth2Callback() {
                     sessionStorage.setItem('alias', alias!);
                 }
 
-                alert("로그인 성공!");
                 // 로그인 성공 로직 내부
                 const redirectUrl = sessionStorage.getItem('redirectUrl');
 

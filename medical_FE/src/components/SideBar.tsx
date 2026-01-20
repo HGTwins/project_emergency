@@ -59,7 +59,7 @@ export default function SideBar({ collapsed, setCollapsed }: SideBarProps) {
               {
                 sessionState.role === "ROLE_ADMIN" ?
                   <Link href="/admin" className={`${collapsed ? 'px-2 py-2 justify-center' : 'px-2.5 py-1.5'} flex items-center hover:bg-[#314E6E] rounded-lg`}>
-                    <img src="../dashboard.svg" />
+                    <img src="../settings.svg" />
                     <span className={`${collapsed ? 'md:hidden' : 'md:inline-flex'} flex-1 ms-3 whitespace-nowrap hidden`}>관리자 페이지</span>
                   </Link>
                   : ""
