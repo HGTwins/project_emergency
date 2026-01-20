@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  # MySQL 데이터베이스 설정
+  db:
+    image: mysql:8.0
+    container_name: mysql-container
+    restart: always
+    environment:
+      MYSQL_DATABASE: hospital
+      MYSQL_ROOT_PASSWORD: root  # 루트 비밀번호
+      MYSQL_USER: hospital
+      MYSQL_PASSWORD: hospital
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql_data:/var/lib/mysql # 데이터 유실 방지를 위한 볼륨 마운트
+
+  # 백엔드 애플리케이션 설정
+  backend:
+    build: . # 현재 위치의 Dockerfile을 빌드
+    container_name: backend-container
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      # DB 호스트를 서비스명인 'db'로 설정하는 것이 핵심입니다.
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/hospital
+      DB_HOST: db
+      DB_PORT: 3306
