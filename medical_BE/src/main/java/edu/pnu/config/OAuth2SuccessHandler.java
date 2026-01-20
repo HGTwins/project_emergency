@@ -9,7 +9,6 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 
 import edu.pnu.util.JWTUtil;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
@@ -41,7 +40,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 	void sendJWTtoClient(HttpServletResponse response, String token) throws IOException {
 		// System.out.println("[OAuth2SuccessHandler]token:" + token);
 		
-		
+		/*
 		// 쿠키는 localhost 이용 시 
 		Cookie cookie = new Cookie("jwtToken", token.replaceAll(JWTUtil.prefix, ""));
 		cookie.setHttpOnly(true); // JS에서 접근 못 하게
@@ -49,14 +48,14 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 		cookie.setPath("/");
 		cookie.setMaxAge(5);	// 5초
 		response.addCookie(cookie);
-		
+		*/
 		
 		// 다른 컴퓨터에서 접속 시
 		// url에 추가
 		// 기존 쿠키 설정 대신 아래 헤더 추가 방식을 권장합니다.
-		//String jwtToken = token.replaceAll(JWTUtil.prefix, "");
+		String jwtToken = token.replaceAll(JWTUtil.prefix, "");
 		String username = provider + "_" + email;
-		String redirectUrl = String.format("https://project-emergency-vr2w.vercel.app/callback?username=%s", username);
+		String redirectUrl = String.format("https://project-emergency-vr2w.vercel.app/callback?username=%s&token=%s", username, jwtToken);
 		
 	    response.sendRedirect(redirectUrl);
 	}
