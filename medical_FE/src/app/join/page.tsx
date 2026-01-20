@@ -106,7 +106,7 @@ export default function JoinPage() {
 
       if (response.ok) {
         alert("회원가입이 완료되었습니다.");
-        router.push('/');
+        router.push('/login');
       } else {
         alert("회원가입이 실패했습니다.");
       }
