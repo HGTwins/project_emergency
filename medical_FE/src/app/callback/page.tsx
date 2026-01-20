@@ -11,6 +11,7 @@ export default function OAuth2Callback() {
         const jwtToken = params.get("token");
 
         const fetchCallback = async () => {
+            console.log(params)
             try {
                 const response = await fetch(`/proxy/api/getMember/${username}`);
                 const data = await response.json();
