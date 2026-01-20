@@ -35,8 +35,7 @@ public interface BasicInfoRepository extends JpaRepository<BasicInfo, Long> {
             ORDER BY FUNCTION('MD5', b.hospitalId)
 		""")
     List<BasicInfo> getListByLocation(@Param("swLat") double swLat, @Param("neLat") double neLat,
-    								@Param("swLng") double swLng, @Param("neLng") double neLng,
-    								Pageable pageable);
+    								@Param("swLng") double swLng, @Param("neLng") double neLng, Pageable pageable);
 	
 	// 전체 병원 유형 수
 	@Query("""

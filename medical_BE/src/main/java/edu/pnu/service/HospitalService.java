@@ -71,8 +71,9 @@ public class HospitalService {
 
 	// 위치로 조회
 	public List<HospitalDto> getListByLocation(MedicalInfoSearch mis){
+		Pageable pageable = PageRequest.of(0, mis.getLevel());
 		
-		return basicRepo.getListByLocation(mis.getSwLat(), mis.getNeLat(), mis.getSwLng(), mis.getNeLng())
+		return basicRepo.getListByLocation(mis.getSwLat(), mis.getNeLat(), mis.getSwLng(), mis.getNeLng(), pageable)
 				.stream()
 				.map(HospitalDto::from)
 				.toList();
