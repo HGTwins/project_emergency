@@ -71,16 +71,8 @@ public class HospitalService {
 
 	// 위치로 조회
 	public List<HospitalDto> getListByLocation(MedicalInfoSearch mis){
-	
-		int limit = switch(mis.getLevel()) {
-			case 1, 2 -> 1000;	// 전국 수준
-			case 3, 4 -> 500;	// 시도
-			default -> 200;		// 시군구
-		};
 		
-		Pageable pageable = PageRequest.of(0, limit);
-		
-		return basicRepo.getListByLocation(mis.getSwLat(), mis.getNeLat(), mis.getSwLng(), mis.getNeLng(), pageable)
+		return basicRepo.getListByLocation(mis.getSwLat(), mis.getNeLat(), mis.getSwLng(), mis.getNeLng())
 				.stream()
 				.map(HospitalDto::from)
 				.toList();
@@ -101,25 +93,41 @@ public class HospitalService {
 	}
 	
 	// 필수 의료 수 (스코어 카드)
-	public Page<EssentialHospitalDto> getPageEssential(MedicalPageSearch mps){
+	public Page<EssentialHospitalDto> getPageEssential(MedicalPageSearch mps, String deptCode){
 		Pageable pageable = PageRequest.of(mps.getPage(), mps.getSize());
 		Page<BasicInfo> essential;
-		// 전체
-		if (mps.getSidoName() == null && mps.getSigunguName() == null) {
-			essential = deptRepo.getPageByAllEssential(pageable);
-		// 시도별
-		} else if (mps.getSidoName() != null && mps.getSigunguName() == null) {
-			essential = deptRepo.getPageByEssentialAndSidoName(mps.getSidoName(), pageable);
-		// 시군구별
+		if (deptCode != null) {
+			// 전체
+			if (mps.getSidoName() == null && mps.getSigunguName() == null) {
+				essential = deptRepo.getPageByAllEssentialAndDeptCode(deptCode, pageable);
+			// 시도별
+			} else if (mps.getSidoName() != null && mps.getSigunguName() == null) {
+				essential = deptRepo.getPageByEssentialAndSidoNameAndDeptCode(mps.getSidoName(), deptCode, pageable);
+			// 시군구별
+			} else {
+				essential = deptRepo.getPageByEssentialAndSidoNameAndSigunguNameAndDeptCode(
+								mps.getSidoName(), mps.getSigunguName(), deptCode, pageable);
+			}
 		} else {
-			essential = deptRepo.getPageByEssentialAndSidoNameAndSigunguName(
-							mps.getSidoName(), mps.getSigunguName(), pageable);
+			// 전체
+			if (mps.getSidoName() == null && mps.getSigunguName() == null) {
+				essential = deptRepo.getPageByAllEssential(pageable);
+			// 시도별
+			} else if (mps.getSidoName() != null && mps.getSigunguName() == null) {
+				
+				essential = deptRepo.getPageByEssentialAndSidoName(mps.getSidoName(), pageable);
+			// 시군구별
+			} else {
+				essential = deptRepo.getPageByEssentialAndSidoNameAndSigunguName(
+								mps.getSidoName(), mps.getSigunguName(), pageable);
+			}
 		}
+		
 		// DTO 변환 및 과목 합치기
 	    return essential.map(hospital -> {
 	        // 이 병원의 필수 과목 리스트를 가져와서 문자열로 합침 
 	        String deptNames = hospital.getDeptDoctors().stream()
-	            .filter(dd -> List.of("10", "11", "24").contains(dd.getDeptCode().getDeptCode()))
+	            .filter(dd -> List.of("10", "11").contains(dd.getDeptCode().getDeptCode()))
 	            .map(dd -> dd.getDeptCode().getDeptName())
 	            .collect(Collectors.joining(", "));
 	        

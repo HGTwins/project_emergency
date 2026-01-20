@@ -42,7 +42,7 @@ public class SecurityConfig {
 		http.csrf(csrf -> csrf.disable());
 		http.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/api/review/**").authenticated()
-				//.requestMatchers("/api/admin/**", "/admin/**").hasRole("ADMIN")
+				.requestMatchers("/api/admin/**", "/admin/**").hasRole("ADMIN")
 				.anyRequest().permitAll());
 		
 		http.cors(cors->cors.configurationSource(corsSource()));

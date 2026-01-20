@@ -43,5 +43,5 @@ export default function OAuth2Callback() {
         };
         fetchCallback();
     }, []);
-    return <>로그인 요청 처리 중...</>;
+    return <></>;
 };
