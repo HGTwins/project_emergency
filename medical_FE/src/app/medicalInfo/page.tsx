@@ -200,7 +200,6 @@ function MedicalInfoContent() {
       }
 
       const data = await resp.json();
-      console.log("서버에서 받은 데이터:", data.content);
       setModalData(data.content || []);
       setTotalPages(data.totalPages || 0);
       setCurrentPage(page!);
@@ -358,7 +357,6 @@ function MedicalInfoContent() {
     setIsLoading(true);
     try {
       const resp = await fetch(url);
-      console.log(url);
 
       if(!resp.ok) {
         throw new Error("병원 정보를 불러오는데 실패했습니다!");
