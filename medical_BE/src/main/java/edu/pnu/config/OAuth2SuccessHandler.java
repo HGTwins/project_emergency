@@ -55,7 +55,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 		// 기존 쿠키 설정 대신 아래 헤더 추가 방식을 권장합니다.
 		String jwtToken = token.replaceAll(JWTUtil.prefix, "");
 		String username = provider + "_" + email;
-		String redirectUrl = String.format("https://project-emergency-vr2w.vercel.app/callback?username=%s&token=%s", username, jwtToken);
+		String redirectUrl = String.format("https://project-emergency.vercel.app/callback?username=%s&token=%s", username, jwtToken);
 		
 	    response.sendRedirect(redirectUrl);
 	}
