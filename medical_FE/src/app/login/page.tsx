@@ -33,7 +33,6 @@ export default function LoginPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(credentials), 
       });
-      console.log(response)
 
       if (response.ok) {
         const jwtToken = response.headers.get('Authorization');
