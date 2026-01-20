@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/proxy/:path*",
-      "destination": "http://140.245.77.74:8080/:path*"
+      "destination": "http://10.125.121.178:8080/:path*"
     }
   ]
 }
