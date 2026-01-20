@@ -163,7 +163,7 @@ function MedicalInfoContent() {
       const sido = await resp.json();
       setSidoList(sido);
     } catch(error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -177,7 +177,7 @@ function MedicalInfoContent() {
       const sgg = await resp.json();
       setSggList(sgg);
     } catch(error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -307,7 +307,7 @@ function MedicalInfoContent() {
       const category = await resp.json();
       setHospCate(category);
     } catch(error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -328,7 +328,7 @@ function MedicalInfoContent() {
       const dept = await resp.json();
       setHospDept(dept);
     } catch(error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
