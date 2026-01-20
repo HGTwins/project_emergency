@@ -136,7 +136,7 @@ medical_FE/src/
 
 ## 🎬 동작 영상
 
-![동작영상]('./img/mediguide.mp4')
+<video src='./img/mediguide.mp4'></video>
 
 ## 💡 프로젝트 후기
 
