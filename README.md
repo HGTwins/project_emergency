@@ -11,7 +11,7 @@
 
 | 이현지(Backend) | 김현지(Frontend) |
 |:---:|:---:|
-|<img src ='' width='150' height='150' /> <br /> <a href='https://github.com/maybecocheon'>@maybecocheon</a>|<img src='' width='150' height='150'/> <br /> <a href='https://github.com/guswlrla'>@guswlrla</a>|
+|<img src ='./img/lee.jpg' width='150' height='150' /> <br /> <a href='https://github.com/maybecocheon'>@maybecocheon</a>|<img src='./img/kim.jpg' width='150' height='150'/> <br /> <a href='https://github.com/guswlrla'>@guswlrla</a>|
 
 ## 🛠 기술 스택
 
@@ -103,18 +103,18 @@ medical_FE/src/
 | `/api/medicalDept` | GET | 진료 과목별 통계 (차트용) | /medicalInfo |
 | `/api/medicalLocation` | GET | 위도/경도 기반 병원 조회 | /medicalInfo |
 | `/api/medicalInfo` | GET | 시도/시군구 기반 병원 조회 | /medicalInfo |
-| `/api/medicalid` | GET | 병원 ID로 단일 조회 (QueryParam) | /medicalInfo |
-| `/api/medicalInfo/{hospitalid}` | GET | 병원 상세 페이지 정보 조회 | /medicalInfo |
+| `/api/medicalId` | GET | 병원 ID로 단일 조회 (QueryParam) | /medicalInfo |
+| `/api/medicalInfo/{hospitalId}` | GET | 병원 상세 페이지 정보 조회 | /medicalInfo |
 
 #### 관리자 페이지
 
 | URI | Method | 설명 | 화면 |
 |-----|--------|------|------|
 | `/api/admin/getMembers` | GET | [관리자] 전체 회원 목록 조회 | /admin |
-| `/api/admin/deletMember/{username}` | DELETE | [관리자] 등록 회원 삭제 | /admin |
+| `/api/admin/deleteMember/{username}` | DELETE | [관리자] 등록 회원 삭제 | /admin |
 | `/api/getMember/{username}` | GET | 특정 회원 정보 조회 | /admin |
-| `/api/review/memberid/{username}` | GET | 특정 사용자 아이디로 리뷰 조회 | /admin |
-| `/api/review/hospitalid/{hospitalid}` | GET | 특정 병원 아이디로 리뷰 조회 | /admin |
+| `/api/review/memberId/{username}` | GET | 특정 사용자 아이디로 리뷰 조회 | /admin |
+| `/api/review/hospitalId/{hospitalId}` | GET | 특정 병원 아이디로 리뷰 조회 | /admin |
 
 #### 회원 가입 / 조회
 
@@ -140,5 +140,8 @@ https://github.com/user-attachments/assets/acecf341-558e-440c-8244-ce6e9a4b4617
 
 ## 💡 프로젝트 후기
 
-- 
-- 
+- 이현지:
+  1) 협업 및 데이터 흐름의 이해: 프론트엔드와 백엔드의 명확한 역할 분담을 통해 전체적인 서비스 구조를 깊이 이해할 수 있었습니다. 특히, 효율적인 API 설계와 일관된 네이밍이 팀 프로젝트의 생산성에 얼마나 직결되는지 체감하며 소통의 중요성을 깨달았습니다.
+  2) 데이터 조회 성능 최적화: 데이터가 많아질수록 성능이 중요해진다는 것을 실감했습니다. Fetch Join으로 조인 횟수를 줄이고, Batch Size로 쿼리를 묶어 보내며 성능이 개선되는 과정을 지켜보는 것이 큰 수확이었습니다.
+  3) 예외 처리 및 응답 데이터 설계: 클라이언트에게 전달할 에러 메시지의 범위와 데이터 양(Response DTO)에 대한 고민을 이어가고 있습니다. 보안과 편의성 사이의 균형을 맞추는 최적의 응답 설계를 위해 앞으로 더 깊은 학습이 필요함을 느꼈습니다.
+- 김현지:
