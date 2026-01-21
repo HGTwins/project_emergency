@@ -20,6 +20,7 @@ import lombok.ToString;
 @Setter
 @Getter
 @ToString(exclude = "boardList")
+
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

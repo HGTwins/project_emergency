@@ -70,8 +70,8 @@ public class HospitalApiController {
 	
 	// 필수 의료 수 (스코어 카드)
 	@GetMapping("/medicalEssential")
-	public ResponseEntity<?> medicalEssential(MedicalPageSearch mps) {
-		return ResponseEntity.ok(hospitalService.getPageEssential(mps));
+	public ResponseEntity<?> medicalEssential(MedicalPageSearch mps, String deptCode) {
+		return ResponseEntity.ok(hospitalService.getPageEssential(mps, deptCode));
 	}
 	
 	// 일요일/공휴일 진료 병원 수 (스코어 카드)

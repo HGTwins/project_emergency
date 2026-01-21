@@ -22,7 +22,7 @@ public interface DeptRepository extends JpaRepository<DeptDoctor, DeptDoctorId> 
 			GROUP BY dc.deptName
 			""")
 	List<DeptCountDto> getListByDept();
-	
+
 	// 시도별 진료 과목 수
 	@Query("""
 			SELECT new edu.pnu.dto.DeptCountDto(dc.deptName, COUNT(dd))
@@ -34,7 +34,7 @@ public interface DeptRepository extends JpaRepository<DeptDoctor, DeptDoctorId> 
 			GROUP BY dc.deptName
 			""")
 	List<DeptCountDto> getListByDeptAndSidoName(@Param("sidoName") String sidoName);
-	
+
 	// 시군구별 진료 과목 수
 	@Query("""
 			SELECT new edu.pnu.dto.DeptCountDto(dc.deptName, COUNT(dd))
@@ -46,41 +46,71 @@ public interface DeptRepository extends JpaRepository<DeptDoctor, DeptDoctorId> 
 			WHERE sd.sidoName = :sidoName AND sg.sigunguName = :sigunguName
 			GROUP BY dc.deptName
 			""")
-	List<DeptCountDto> getListByDeptAndSidoNameAndSigunguName(
-							@Param("sidoName") String sidoName, @Param("sigunguName") String sigunguName);
+	List<DeptCountDto> getListByDeptAndSidoNameAndSigunguName(@Param("sidoName") String sidoName,
+			@Param("sigunguName") String sigunguName);
 
 	// 전체 필수 의료 진료 과목
 	@Query("""
 			SELECT DISTINCT b
 			FROM DeptDoctor dd
 			JOIN dd.basicInfo b
-			JOIN FETCH b.deptDoctors
-			WHERE dd.deptCode.deptCode IN ('10', '11', '24')
+			WHERE dd.deptCode.deptCode IN ('10', '11')
 			""")
 	Page<BasicInfo> getPageByAllEssential(Pageable pageable);
-	
+
 	// 시도별 필수 의료 진료 과목
 	@Query("""
 			SELECT DISTINCT b
 			FROM DeptDoctor dd
 			JOIN dd.basicInfo b
-			JOIN FETCH b.deptDoctors
 			JOIN b.sidoCode sd
-			WHERE sd.sidoName = :sidoName AND dd.deptCode.deptCode IN ('10', '11', '24')
+			WHERE sd.sidoName = :sidoName AND dd.deptCode.deptCode IN ('10', '11')
 			""")
 	Page<BasicInfo> getPageByEssentialAndSidoName(@Param("sidoName") String sidoName, Pageable pageable);
-	
+
 	// 시군구별 필수 의료 진료 과목
 	@Query("""
 			SELECT DISTINCT b
 			FROM DeptDoctor dd
 			JOIN dd.basicInfo b
-			JOIN FETCH b.deptDoctors
 			JOIN b.sidoCode sd
 			JOIN b.sigunguCode sg
 			WHERE sd.sidoName = :sidoName AND sg.sigunguName = :sigunguName
-			AND dd.deptCode.deptCode IN ('10', '11', '24')
+			AND dd.deptCode.deptCode IN ('10', '11')
 			""")
-	Page<BasicInfo> getPageByEssentialAndSidoNameAndSigunguName(
-					@Param("sidoName") String sidoName, @Param("sigunguName") String sigunguName, Pageable pageable);
+	Page<BasicInfo> getPageByEssentialAndSidoNameAndSigunguName(@Param("sidoName") String sidoName,
+			@Param("sigunguName") String sigunguName, Pageable pageable);
+
+	// 전체 필수 의료 진료 과목 구분
+	@Query("""
+			SELECT DISTINCT b
+			FROM DeptDoctor dd
+			JOIN dd.basicInfo b
+			WHERE dd.deptCode.deptCode = :deptCode
+			""")
+	Page<BasicInfo> getPageByAllEssentialAndDeptCode(@Param("deptCode") String deptCode, Pageable pageable);
+
+	// 시도별 필수 의료 진료 과목 구분
+	@Query("""
+			SELECT DISTINCT b
+			FROM DeptDoctor dd
+			JOIN dd.basicInfo b
+			JOIN b.sidoCode sd
+			WHERE sd.sidoName = :sidoName AND dd.deptCode.deptCode = :deptCode
+			""")
+	Page<BasicInfo> getPageByEssentialAndSidoNameAndDeptCode(@Param("sidoName") String sidoName,
+			@Param("deptCode") String deptCode, Pageable pageable);
+
+	// 시군구별 필수 의료 진료 과목 구분
+	@Query("""
+			SELECT DISTINCT b
+			FROM DeptDoctor dd
+			JOIN dd.basicInfo b
+			JOIN b.sidoCode sd
+			JOIN b.sigunguCode sg
+			WHERE sd.sidoName = :sidoName AND sg.sigunguName = :sigunguName
+			AND dd.deptCode.deptCode = :deptCode
+			""")
+	Page<BasicInfo> getPageByEssentialAndSidoNameAndSigunguNameAndDeptCode(@Param("sidoName") String sidoName,
+			@Param("sigunguName") String sigunguName, @Param("deptCode") String deptCode, Pageable pageable);
 }

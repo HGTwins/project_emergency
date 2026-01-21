@@ -2,6 +2,8 @@ package edu.pnu.controller;
 
 import java.util.Collections;
 
+import javax.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -54,7 +56,7 @@ public class MemberApiController {
 	
 	// 회원가입
 	@PostMapping("/join")
-	public ResponseEntity<?> join(@RequestBody MemberJoinDto dto) {
+	public ResponseEntity<?> join(@Valid @RequestBody MemberJoinDto dto) {
 		memberService.join(dto);
 		return ResponseEntity.ok("회원가입이 완료되었습니다.");
 	}

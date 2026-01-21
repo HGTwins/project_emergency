@@ -30,7 +30,7 @@ public class MemberService {
 	public Member getMember(String username) {
 		return memberRepo.findById(username).get();
 	}
-	
+
 	// 회원 가입 시 중복 체크
 	public void duplicateCheck(MemberDuplicateDto mdd) {
 		if ("username".equals(mdd.getType())) {
@@ -43,11 +43,11 @@ public class MemberService {
 			}
 		}
 	}
-	
+
 	// 회원가입
-	public void join(MemberJoinDto dto) {
-		Member member = Member.builder().username(dto.getUsername()).password(passwordEncoder.encode(dto.getPassword()))
-				.alias(dto.getAlias()).enabled(true).role(Role.ROLE_MEMBER).build();
+	public void join(MemberJoinDto mjd) {
+		Member member = Member.builder().username(mjd.getUsername()).password(passwordEncoder.encode(mjd.getPassword()))
+				.alias(mjd.getAlias()).enabled(true).role(Role.ROLE_MEMBER).build();
 
 		memberRepo.save(member);
 	}
