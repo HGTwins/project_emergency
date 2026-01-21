@@ -103,18 +103,18 @@ medical_FE/src/
 | `/api/medicalDept` | GET | 진료 과목별 통계 (차트용) | /medicalInfo |
 | `/api/medicalLocation` | GET | 위도/경도 기반 병원 조회 | /medicalInfo |
 | `/api/medicalInfo` | GET | 시도/시군구 기반 병원 조회 | /medicalInfo |
-| `/api/medicalid` | GET | 병원 ID로 단일 조회 (QueryParam) | /medicalInfo |
-| `/api/medicalInfo/{hospitalid}` | GET | 병원 상세 페이지 정보 조회 | /medicalInfo |
+| `/api/medicalId` | GET | 병원 ID로 단일 조회 (QueryParam) | /medicalInfo |
+| `/api/medicalInfo/{hospitalId}` | GET | 병원 상세 페이지 정보 조회 | /medicalInfo |
 
 #### 관리자 페이지
 
 | URI | Method | 설명 | 화면 |
 |-----|--------|------|------|
 | `/api/admin/getMembers` | GET | [관리자] 전체 회원 목록 조회 | /admin |
-| `/api/admin/deletMember/{username}` | DELETE | [관리자] 등록 회원 삭제 | /admin |
+| `/api/admin/deleteMember/{username}` | DELETE | [관리자] 등록 회원 삭제 | /admin |
 | `/api/getMember/{username}` | GET | 특정 회원 정보 조회 | /admin |
-| `/api/review/memberid/{username}` | GET | 특정 사용자 아이디로 리뷰 조회 | /admin |
-| `/api/review/hospitalid/{hospitalid}` | GET | 특정 병원 아이디로 리뷰 조회 | /admin |
+| `/api/review/memberId/{username}` | GET | 특정 사용자 아이디로 리뷰 조회 | /admin |
+| `/api/review/hospitalId/{hospitalId}` | GET | 특정 병원 아이디로 리뷰 조회 | /admin |
 
 #### 회원 가입 / 조회
 
