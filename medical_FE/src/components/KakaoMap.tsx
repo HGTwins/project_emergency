@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useRef, useState } from "react"
-import { CustomOverlayMap, Map, MapMarker, Polygon } from "react-kakao-maps-sdk"
+import { CustomOverlayMap, Map, MapMarker } from "react-kakao-maps-sdk"
 import { HospLocation } from "@/types/HospLocation";
 import OverlayCard from "./OverlayCard";
 import { Fragment } from 'react';
