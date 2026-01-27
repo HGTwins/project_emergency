@@ -27,7 +27,7 @@ type IconPath = keyof typeof iconList;
 
 export default function ScoreCard({title, content, onOpen, color, imgSrc}: ScoreCardProps) {
   return (
-    <div className='bg-white p-6 border border-gray-200 rounded-2xl h-30 flex justify-center items-center shadow-sm
+    <div className='bg-white p-3 border border-gray-200 rounded-2xl h-30 flex justify-center items-center shadow-sm
                     hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer'
                     onClick={onOpen}>
       <div className="w-full flex justify-between items-center">
@@ -35,7 +35,7 @@ export default function ScoreCard({title, content, onOpen, color, imgSrc}: Score
           <img src={iconList[imgSrc]} className="w-6 h-6" />
         </div>
         <div className="flex flex-col">
-          <h2 className="text-gray-600 whitespace-nowrap">{title}</h2>
+          <h2 className="text-gray-600 whitespace-nowrap text-sm">{title}</h2>
           <p className="font-bold flex justify-end text-xl mt-2">{content.toLocaleString()}개</p>
         </div>
       </div>
